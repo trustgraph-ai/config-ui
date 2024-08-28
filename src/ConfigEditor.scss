@@ -24,12 +24,11 @@
         .selection-field {
             padding: 0.3rem;
             display: flex;
-            justify-content: space-between;
             align-items: center;
 
             & > div {
-                padding: .8rem;
-                margin: 0.4rem;
+                padding: 0.2rem;
+                margin: 0.2rem;
             }
 
             & > :nth-child(1) {
