@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import './ConfigEditor.scss';
 import Selection from './Selection';
@@ -23,47 +24,50 @@ function featuresMet(selected, patternMap) {
 
 function ConfigEditor() {
 
-//    const [selected, setSelected] = useState([patterns[0], patterns[1], patterns[4]]);
-//    const [itemSelected, setItemSelected] = useState(patterns[4]);
-    const [selected, setSelected] = useState([]);
-    const [itemSelected, setItemSelected] = useState(null);
+    const [configuration, setConfiguration] = useState([]);
+    const [selection, setSelection] = useState(null);
 
     const patternMap = new Map<string, any>(
 	patterns.map(obj => [obj.pattern.name, obj])
     );
 
-    const selectedFeatures = featuresMet(selected, patternMap);
+    const configurationFeatures = featuresMet(configuration, patternMap);
 
     const available = patterns.filter(
-        x => dependenciesMet(x, selectedFeatures)
+        x => dependenciesMet(x, configurationFeatures)
     ).filter(
-	x => ! (new Set(selected).has(x))
+	x => ! (new Set(configuration).has(x))
     );
 
     const unavailable = patterns.filter(
-        x => ! dependenciesMet(x, selectedFeatures)
+        x => ! dependenciesMet(x, configurationFeatures)
     ).filter(
-	x => ! (new Set(selected).has(x))
+	x => ! (new Set(configuration).has(x))
     );
 
+    function select(pattern) {
+        setSelection(pattern);
+    }
+
     function add(x) {
-        setSelected([...selected, patternMap.get(x)]);
+        setConfiguration([...configuration, patternMap.get(x)]);
     }
 
     function remove(x) {
-        let sel = selected.filter(y => !(y == x));
+        let cfg = configuration.filter(y => !(y == x));
 
         while(true) {
-            let features = featuresMet(sel, patternMap);
-            let updSel = sel.filter(
+            let features = featuresMet(cfg, patternMap);
+            let update = cfg.filter(
                 y => dependenciesMet(y, features)
             );
-            if (updSel.length == sel.length) break;
-            sel = updSel;
+            if (update.length == cfg.length) break;
+            cfg = update;
         }
 
-        setItemSelected(null);
-        setSelected(sel);
+        setSelection(null);
+        setConfiguration(cfg);
+
     }
 
     return (
@@ -72,15 +76,18 @@ function ConfigEditor() {
             <div className="config-editor">
                 <Selection
                     available={available} unavailable={unavailable}
-                    selected={selected}
+                    configuration={configuration}
                     add={add}
                     remove={remove}
-                    itemSelected={itemSelected}
-                    setItemSelected={setItemSelected}
+                    selection={selection}
+                    select={select}
+                    patterns={patterns}
                 />	     
                 <ItemEditor
-                    itemSelected={itemSelected}
-                    setItemSelected={setItemSelected}
+                    configuration={configuration}
+                    selection={selection}
+                    select={select}
+                    patterns={patterns}
                 />
             </div>
         </>

@@ -1,7 +1,7 @@
 
-import patterns from './patterns.json';
-
-function Available({available, unavailable, add}) {
+function Available({
+    available, unavailable, add, select, selection, patterns
+}) {
 
     let featureMap = new Map<string, any>();
 
@@ -12,14 +12,13 @@ function Available({available, unavailable, add}) {
             }
         )
     );
-    console.log(featureMap);
 
     if (available.length == 0 && unavailable.length == 0) return null;
 
     return (
         <div className="card">
 
-            <h2>Available</h2>
+            <h2>Available configuration patterns</h2>
 
             <div className="selection-box">
 
@@ -30,9 +29,15 @@ function Available({available, unavailable, add}) {
                             key={n.pattern.name}
                         >
                             <div>{n.pattern.title}</div>
-                            <button onClick={() => add(n.pattern.name)}>
-                                add
-                            </button>
+                            <div>
+                                <button onClick={() => select(n)}>
+                                    info
+                                </button>
+				<button onClick={() => add(n.pattern.name)}>
+				    add
+				</button>
+			    </div>
+			    <div></div>
                         </div>
                     ))
                 }
@@ -44,6 +49,11 @@ function Available({available, unavailable, add}) {
                             key={n.pattern.name}
                         >
                             <div>{n.pattern.title}</div>
+			    <div>
+                                <button onClick={() => select(n)}>
+                                    info
+                                </button>
+			    </div>
                             <div>
                             {
 

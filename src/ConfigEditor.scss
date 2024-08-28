@@ -27,36 +27,38 @@
             justify-content: space-between;
             align-items: center;
 
-            div {
+            & > div {
                 padding: .8rem;
                 margin: 0.4rem;
             }
 
-            :nth-child(1) {
+            & > :nth-child(1) {
                 width: 20rem;
                 text-align: left;
             }
 
-            div:nth-child(2) {
+            & > div:nth-child(2) {
                 width: 12rem;
             }
 
-            div:nth-child(3) {
-                width: 5rem;
+            & > div:nth-child(3) {
+
+                width: 12rem;
+
+                & > span.dep {
+
+                    color: white;
+                    font-size: small;
+                    white-space: nowrap;
+                    display: block-inline;
+                    background-color: #202010;
+                    padding: 0.4rem;
+                    margin: 0.2rem;
+                    border-radius: 8px;
+
+                }
             }
 
-            div:nth-child(2) span.dep {
-
-                color: white;
-                font-size: small;
-                white-space: nowrap;
-                display: block-inline;
-                background-color: #202010;
-                padding: 0.4rem;
-                margin: 0.2rem;
-                border-radius: 8px;
-
-            }
 
         }
 
@@ -67,8 +69,8 @@
         width: 45rem;
 
         textarea {
-            width: 40rem;
-            height: 5rem;
+            width: 45rem;
+            height: 15rem;
         } 
 
     }
