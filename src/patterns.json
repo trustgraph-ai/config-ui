@@ -86,22 +86,14 @@
          }
       },
       "pattern": {
-         "args": [
-            {
-               "description": "An example argument",
-               "name": "example",
-               "required": false,
-               "type": "string",
-               "width": 20
-            }
-         ],
-         "description": "Adds Pulsar support",
+         "args": [ ],
+         "description": "Cloud-native, distributed messaging and Streaming. Apache Pulsar is an open-source, distributed messaging and streaming platform built for the cloud.  Trustgraph uses Pulsar to manage the message flow between all components.",
          "features": [
             "pulsar"
          ],
          "name": "pulsar",
          "requires": [ ],
-         "title": "Pub/sub foundation support"
+         "title": "Deploy messaging foundation support"
       }
    },
    {
@@ -382,63 +374,65 @@
                "width": 20
             }
          ],
-         "description": "Adds Cassandra and Graph RAG components",
+         "description": "Adds Cassandra and Graph RAG components for query and indexing of data.",
          "features": [
-            "cassandra"
+            "cassandra",
+            "rag"
          ],
          "name": "graph-rag-cassandra",
          "requires": [
             "pulsar",
             "trustgraph"
          ],
-         "title": "GraphRAG using Cassandra"
+         "title": "Deploys GraphRAG indexing and querying using Cassandra"
       }
    },
    {
       "module": {
          "services": {
-            "cassandra": {
+            "neo4j": {
                "deploy": {
                   "resources": {
                      "limits": {
                         "cpus": "1.0",
-                        "memory": "800M"
+                        "memory": "768M"
                      },
                      "reservations": {
                         "cpus": "0.5",
-                        "memory": "800M"
+                        "memory": "768M"
                      }
                   }
                },
                "environment": {
-                  "JVM_OPTS": "-Xms256M -Xmx256M"
+                  "NEO4J_AUTH": "neo4j/password"
                },
-               "image": "docker.io/cassandra:4.1.6",
+               "image": "docker.io/neo4j:5.22.0-community-bullseye",
                "ports": [
-                  "9042:9042"
+                  "7474:7474",
+                  "7687:7687"
                ],
                "restart": "on-failure:100",
                "volumes": [
-                  "cassandra:/var/lib/cassandra"
+                  "neo4j:/data"
                ]
             },
             "query-triples": {
                "command": [
-                  "triples-query-cassandra",
+                  "triples-query-neo4j",
                   "-p",
                   "pulsar://pulsar:6650",
                   "-g",
-                  "cassandra"
+                  "bolt://neo4j:7687"
                ],
                "deploy": {
                   "resources": {
                      "limits": {
                         "cpus": "0.5",
-                        "memory": "512M"
+                        "memory": "128M"
                      },
                      "reservations": {
                         "cpus": "0.1",
-                        "memory": "512M"
+                        "memory": "128M"
                      }
                   }
                },
@@ -447,11 +441,11 @@
             },
             "store-triples": {
                "command": [
-                  "triples-write-cassandra",
+                  "triples-write-neo4j",
                   "-p",
                   "pulsar://pulsar:6650",
                   "-g",
-                  "cassandra"
+                  "bolt://neo4j:7687"
                ],
                "deploy": {
                   "resources": {
@@ -470,7 +464,109 @@
             }
          },
          "volumes": {
-            "cassandra": { }
+            "neo4j": { }
+         }
+      },
+      "pattern": {
+         "args": [
+            {
+               "description": "An example argument",
+               "name": "example",
+               "required": false,
+               "type": "string",
+               "width": 20
+            }
+         ],
+         "description": "Adds Neo4j community edition and Graph RAG components",
+         "features": [
+            "neo4j",
+            "rag"
+         ],
+         "name": "graph-rag-cassandra",
+         "requires": [
+            "pulsar",
+            "trustgraph"
+         ],
+         "title": "Deploys GraphRAG indexing and querying using a Neo4j community edition store"
+      }
+   },
+   {
+      "module": {
+         "services": {
+            "prompt": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "prompt-rag": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-i",
+                  "non-persistent://tg/request/prompt-rag",
+                  "-o",
+                  "non-persistent://tg/response/prompt-rag-response",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-rag-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            }
          }
       },
       "pattern": {
@@ -499,61 +595,64 @@
    {
       "module": {
          "services": {
-            "cassandra": {
-               "deploy": {
-                  "resources": {
-                     "limits": {
-                        "cpus": "1.0",
-                        "memory": "800M"
-                     },
-                     "reservations": {
-                        "cpus": "0.5",
-                        "memory": "800M"
-                     }
-                  }
-               },
-               "environment": {
-                  "JVM_OPTS": "-Xms256M -Xmx256M"
-               },
-               "image": "docker.io/cassandra:4.1.6",
-               "ports": [
-                  "9042:9042"
-               ],
-               "restart": "on-failure:100",
-               "volumes": [
-                  "cassandra:/var/lib/cassandra"
-               ]
-            },
-            "query-triples": {
+            "prompt": {
                "command": [
-                  "triples-query-cassandra",
+                  "prompt-template",
                   "-p",
                   "pulsar://pulsar:6650",
-                  "-g",
-                  "cassandra"
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
                ],
                "deploy": {
                   "resources": {
                      "limits": {
                         "cpus": "0.5",
-                        "memory": "512M"
+                        "memory": "128M"
                      },
                      "reservations": {
                         "cpus": "0.1",
-                        "memory": "512M"
+                        "memory": "128M"
                      }
                   }
                },
                "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
                "restart": "on-failure:100"
             },
-            "store-triples": {
+            "prompt-rag": {
                "command": [
-                  "triples-write-cassandra",
+                  "prompt-template",
                   "-p",
                   "pulsar://pulsar:6650",
-                  "-g",
-                  "cassandra"
+                  "-i",
+                  "non-persistent://tg/request/prompt-rag",
+                  "-o",
+                  "non-persistent://tg/response/prompt-rag-response",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-rag-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
                ],
                "deploy": {
                   "resources": {
@@ -570,9 +669,6 @@
                "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
                "restart": "on-failure:100"
             }
-         },
-         "volumes": {
-            "cassandra": { }
          }
       },
       "pattern": {
@@ -601,61 +697,64 @@
    {
       "module": {
          "services": {
-            "cassandra": {
-               "deploy": {
-                  "resources": {
-                     "limits": {
-                        "cpus": "1.0",
-                        "memory": "800M"
-                     },
-                     "reservations": {
-                        "cpus": "0.5",
-                        "memory": "800M"
-                     }
-                  }
-               },
-               "environment": {
-                  "JVM_OPTS": "-Xms256M -Xmx256M"
-               },
-               "image": "docker.io/cassandra:4.1.6",
-               "ports": [
-                  "9042:9042"
-               ],
-               "restart": "on-failure:100",
-               "volumes": [
-                  "cassandra:/var/lib/cassandra"
-               ]
-            },
-            "query-triples": {
+            "prompt": {
                "command": [
-                  "triples-query-cassandra",
+                  "prompt-template",
                   "-p",
                   "pulsar://pulsar:6650",
-                  "-g",
-                  "cassandra"
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
                ],
                "deploy": {
                   "resources": {
                      "limits": {
                         "cpus": "0.5",
-                        "memory": "512M"
+                        "memory": "128M"
                      },
                      "reservations": {
                         "cpus": "0.1",
-                        "memory": "512M"
+                        "memory": "128M"
                      }
                   }
                },
                "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
                "restart": "on-failure:100"
             },
-            "store-triples": {
+            "prompt-rag": {
                "command": [
-                  "triples-write-cassandra",
+                  "prompt-template",
                   "-p",
                   "pulsar://pulsar:6650",
-                  "-g",
-                  "cassandra"
+                  "-i",
+                  "non-persistent://tg/request/prompt-rag",
+                  "-o",
+                  "non-persistent://tg/response/prompt-rag-response",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-rag-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
                ],
                "deploy": {
                   "resources": {
@@ -672,9 +771,6 @@
                "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
                "restart": "on-failure:100"
             }
-         },
-         "volumes": {
-            "cassandra": { }
          }
       },
       "pattern": {
@@ -698,6 +794,210 @@
             "trustgraph"
          ],
          "title": "Specify relationship extraction prompt"
+      }
+   },
+   {
+      "module": {
+         "services": {
+            "prompt": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "prompt-rag": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-i",
+                  "non-persistent://tg/request/prompt-rag",
+                  "-o",
+                  "non-persistent://tg/response/prompt-rag-response",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-rag-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            }
+         }
+      },
+      "pattern": {
+         "args": [
+            {
+               "default": "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+               "description": "Document query prompt",
+               "name": "prompt",
+               "required": true,
+               "type": "string",
+               "width": 2000
+            }
+         ],
+         "description": "Prompt for document query / unstructured RAG",
+         "features": [
+            "document-query-prompt"
+         ],
+         "name": "prompt-template-document-query",
+         "requires": [
+            "pulsar",
+            "trustgraph"
+         ],
+         "title": "Specify document query prompt"
+      }
+   },
+   {
+      "module": {
+         "services": {
+            "prompt": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "prompt-rag": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-i",
+                  "non-persistent://tg/request/prompt-rag",
+                  "-o",
+                  "non-persistent://tg/response/prompt-rag-response",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-rag-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            }
+         }
+      },
+      "pattern": {
+         "args": [
+            {
+               "default": "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>",
+               "description": "Row data extraction prompt",
+               "name": "prompt",
+               "required": true,
+               "type": "string",
+               "width": 2000
+            }
+         ],
+         "description": "Prompt for tableular / row data extraction",
+         "features": [
+            "extract-rows-prompt"
+         ],
+         "name": "prompt-template-rows-template",
+         "requires": [
+            "pulsar",
+            "trustgraph"
+         ],
+         "title": "Specify tablular data / row data extraction prompt"
       }
    },
    {
@@ -804,6 +1104,1483 @@
             "trustgraph"
          ],
          "title": "Recursive chunker configuration override"
+      }
+   },
+   {
+      "module": {
+         "services": {
+            "prompt": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "prompt-rag": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-i",
+                  "non-persistent://tg/request/prompt-rag",
+                  "-o",
+                  "non-persistent://tg/response/prompt-rag-response",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-rag-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "text-completion": {
+               "command": [
+                  "text-completion-azure",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-k",
+                  "${AZURE_TOKEN}",
+                  "-e",
+                  "${AZURE_ENDPOINT}",
+                  "-x",
+                  "4096",
+                  "-t",
+                  "0.0"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "text-completion-rag": {
+               "command": [
+                  "text-completion-azure",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-k",
+                  "${AZURE_TOKEN}",
+                  "-e",
+                  "${AZURE_ENDPOINT}",
+                  "-i",
+                  "-x",
+                  "4096",
+                  "-t",
+                  "0.0",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "-o",
+                  "non-persistent://tg/response/text-completion-rag-response"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            }
+         }
+      },
+      "pattern": {
+         "args": [ ],
+         "description": "This pattern uses an Azure LLM endpoint hosted in the Azure cloud.  You need an Azure subscription and to have an endpoint deployed to be able to use this service.",
+         "features": [
+            "llm"
+         ],
+         "name": "azure",
+         "requires": [
+            "pulsar",
+            "trustgraph"
+         ],
+         "title": "Deploy Azure LLM endpoint support"
+      }
+   },
+   {
+      "module": {
+         "services": {
+            "chunker": {
+               "command": [
+                  "chunker-recursive",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "--chunk-size",
+                  "2000",
+                  "--chunk-overlap",
+                  "100"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "prompt": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "prompt-rag": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-i",
+                  "non-persistent://tg/request/prompt-rag",
+                  "-o",
+                  "non-persistent://tg/response/prompt-rag-response",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-rag-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "text-completion": {
+               "command": [
+                  "text-completion-bedrock",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-z",
+                  "${AWS_ID_KEY}",
+                  "-k",
+                  "${AWS_SECRET_KEY}",
+                  "-r",
+                  "us-west-2",
+                  "-x",
+                  "4096",
+                  "-t",
+                  "0.0",
+                  "-m",
+                  "mistral.mixtral-8x7b-instruct-v0:1"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "text-completion-rag": {
+               "command": [
+                  "text-completion-bedrock",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-z",
+                  "${AWS_ID_KEY}",
+                  "-k",
+                  "${AWS_SECRET_KEY}",
+                  "-r",
+                  "us-west-2",
+                  "-x",
+                  "4096",
+                  "-t",
+                  "0.0",
+                  "-m",
+                  "mistral.mixtral-8x7b-instruct-v0:1",
+                  "-i",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "-o",
+                  "non-persistent://tg/response/text-completion-rag-response"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            }
+         }
+      },
+      "pattern": {
+         "args": [ ],
+         "description": "This pattern uses an AWS Bedrock LLM hosted in the AWS cloud service.  You need an AWS subscription to be able to use this service.",
+         "features": [
+            "llm"
+         ],
+         "name": "bedrock",
+         "requires": [
+            "pulsar",
+            "trustgraph"
+         ],
+         "title": "Deploy AWS Bedrock LLM endpoint support"
+      }
+   },
+   {
+      "module": {
+         "services": {
+            "prompt": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "prompt-rag": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-i",
+                  "non-persistent://tg/request/prompt-rag",
+                  "-o",
+                  "non-persistent://tg/response/prompt-rag-response",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-rag-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "text-completion": {
+               "command": [
+                  "text-completion-claude",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-k",
+                  "${CLAUDE_KEY}",
+                  "-x",
+                  "4096",
+                  "-t",
+                  "0.0"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "text-completion-rag": {
+               "command": [
+                  "text-completion-claude",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-k",
+                  "${CLAUDE_KEY}",
+                  "-x",
+                  "4096",
+                  "-t",
+                  "0.0",
+                  "-i",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "-o",
+                  "non-persistent://tg/response/text-completion-rag-response"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            }
+         }
+      },
+      "pattern": {
+         "args": [ ],
+         "description": "This pattern uses an Anthropic Claude LLM hosted in the Anthropic cloud service.  You need an Anthropic API subscription to be able to use this service.",
+         "features": [
+            "llm"
+         ],
+         "name": "claude",
+         "requires": [
+            "pulsar",
+            "trustgraph"
+         ],
+         "title": "Deploy Anthropic Claude LLM support"
+      }
+   },
+   {
+      "module": {
+         "services": {
+            "chunker": {
+               "command": [
+                  "${CHUNKER:-chunker-token}",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "--chunk-size",
+                  "150",
+                  "--chunk-overlap",
+                  "10"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "prompt": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "prompt-rag": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-i",
+                  "non-persistent://tg/request/prompt-rag",
+                  "-o",
+                  "non-persistent://tg/response/prompt-rag-response",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-rag-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "text-completion": {
+               "command": [
+                  "text-completion-cohere",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-k",
+                  "${COHERE_KEY}",
+                  "-t",
+                  "0.0"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "text-completion-rag": {
+               "command": [
+                  "text-completion-cohere",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-k",
+                  "${COHERE_KEY}",
+                  "-t",
+                  "0.0",
+                  "-i",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "-o",
+                  "non-persistent://tg/response/text-completion-rag-response"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            }
+         }
+      },
+      "pattern": {
+         "args": [ ],
+         "description": "This pattern uses a Cohere LLM hosted in the Cohere service.  You need a Cohere subscription to be able to use this service.",
+         "features": [
+            "llm"
+         ],
+         "name": "bedrock",
+         "requires": [
+            "pulsar",
+            "trustgraph"
+         ],
+         "title": "Deploy Cohere LLM endpoint support"
+      }
+   },
+   {
+      "module": {
+         "services": {
+            "prompt": {
+               "command": [
+                  "prompt-generic",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-response"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "prompt-rag": {
+               "command": [
+                  "prompt-generic",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-i",
+                  "non-persistent://tg/request/prompt-rag",
+                  "-o",
+                  "non-persistent://tg/response/prompt-rag-response",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-rag-response"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "text-completion": {
+               "command": [
+                  "text-completion-ollama",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-m",
+                  "gemma2:9b",
+                  "-r",
+                  "${OLLAMA_HOST}"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "text-completion-rag": {
+               "command": [
+                  "text-completion-ollama",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-m",
+                  "gemma2:9b",
+                  "-r",
+                  "${OLLAMA_HOST}",
+                  "-i",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "-o",
+                  "non-persistent://tg/response/text-completion-rag-response"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            }
+         }
+      },
+      "pattern": {
+         "args": [ ],
+         "description": "This pattern uses an Ollama LLM hosting service.  You need an Ollama service to be running and have LLM models pulled using ollama pull.",
+         "features": [
+            "llm"
+         ],
+         "name": "ollama",
+         "requires": [
+            "pulsar",
+            "trustgraph"
+         ],
+         "title": "Deploy Ollama LLM support"
+      }
+   },
+   {
+      "module": {
+         "services": {
+            "prompt": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "prompt-rag": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-i",
+                  "non-persistent://tg/request/prompt-rag",
+                  "-o",
+                  "non-persistent://tg/response/prompt-rag-response",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-rag-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "text-completion": {
+               "command": [
+                  "text-completion-openai",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-k",
+                  "${OPENAI_KEY}",
+                  "-x",
+                  "4096",
+                  "-t",
+                  "0.0"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "text-completion-rag": {
+               "command": [
+                  "text-completion-openai",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-k",
+                  "${OPENAI_KEY}",
+                  "-x",
+                  "4096",
+                  "-t",
+                  "0.0",
+                  "-i",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "-o",
+                  "non-persistent://tg/response/text-completion-rag-response"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            }
+         }
+      },
+      "pattern": {
+         "args": [ ],
+         "description": "This pattern uses an OpenAI LLM hosted in the OpenAI service.  You need an OpenAI API subscription to be able to use this service.",
+         "features": [
+            "llm"
+         ],
+         "name": "openai",
+         "requires": [
+            "pulsar",
+            "trustgraph"
+         ],
+         "title": "Deploy OpenAI LLM endpoint support"
+      }
+   },
+   {
+      "module": {
+         "services": {
+            "prompt": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "prompt-rag": {
+               "command": [
+                  "prompt-template",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-i",
+                  "non-persistent://tg/request/prompt-rag",
+                  "-o",
+                  "non-persistent://tg/response/prompt-rag-response",
+                  "--text-completion-request-queue",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "--text-completion-response-queue",
+                  "non-persistent://tg/response/text-completion-rag-response",
+                  "--definition-template",
+                  "<instructions>\nStudy the following text and derive definitions for any discovered entities.\nDo not provide definitions for entities whose definitions are incomplete\nor unknown.\nOutput relationships in JSON format as an arary of objects with fields:\n- entity: the name of the entity\n- definition: English text which defines the entity\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract will be written as plain text.  Do not add markdown formatting\nor headers or prefixes.  Do not include null or unknown definitions.\n</requirements>",
+                  "--relationship-template",
+                  "<instructions>\nStudy the following text and derive entity relationships.  For each\nrelationship, derive the subject, predicate and object of the relationship.\nOutput relationships in JSON format as an arary of objects with fields:\n- subject: the subject of the relationship\n- predicate: the predicate\n- object: the object of the relationship\n- object-entity: false if the object is a simple data type: name, value or date.  true if it is an entity.\n</instructions>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not use special characters in the abstract text. The\nabstract must be written as plain text.  Do not add markdown formatting\nor headers or prefixes.\n</requirements>",
+                  "--knowledge-query-template",
+                  "Study the following set of knowledge statements. The statements are written in Cypher format that has been extracted from a knowledge graph. Use only the provided set of knowledge statements in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere's the knowledge statements:\n{graph}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--document-query-template",
+                  "Study the following context. Use only the information provided in the context in your response. Do not speculate if the answer is not found in the provided set of knowledge statements.\n\nHere is the context:\n{documents}\n\nUse only the provided knowledge statements to respond to the following:\n{query}\n",
+                  "--rows-template",
+                  "<instructions>\nStudy the following text and derive objects which match the schema provided.\n\nYou must output an array of JSON objects for each object you discover\nwhich matches the schema.  For each object, output a JSON object whose fields\ncarry the name field specified in the schema.\n</instructions>\n\n<schema>\n{schema}\n</schema>\n\n<text>\n{text}\n</text>\n\n<requirements>\nYou will respond only with raw JSON format data. Do not provide\nexplanations. Do not add markdown formatting or headers or prefixes.\n</requirements>"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "text-completion": {
+               "command": [
+                  "text-completion-vertexai",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-k",
+                  "/vertexai/private.json",
+                  "-r",
+                  "us-central1",
+                  "-x",
+                  "4096",
+                  "-t",
+                  "0.0"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100",
+               "volumes": [
+                  "./vertexai:/vertexai"
+               ]
+            },
+            "text-completion-rag": {
+               "command": [
+                  "text-completion-vertexai",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-k",
+                  "/vertexai/private.json",
+                  "-r",
+                  "us-central1",
+                  "-x",
+                  "4096",
+                  "-t",
+                  "0.0",
+                  "-i",
+                  "non-persistent://tg/request/text-completion-rag",
+                  "-o",
+                  "non-persistent://tg/response/text-completion-rag-response"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100",
+               "volumes": [
+                  "./vertexai:/vertexai"
+               ]
+            }
+         }
+      },
+      "pattern": {
+         "args": [ ],
+         "description": "This pattern uses an VertexAI LLM hosted in Google Cloud.  You need a Google Cloud subscription to be able to use this service.",
+         "features": [
+            "llm"
+         ],
+         "name": "vertexai",
+         "requires": [
+            "pulsar",
+            "trustgraph"
+         ],
+         "title": "Deploy Google Cloud VertexAI LLM support"
+      }
+   },
+   {
+      "module": {
+         "services": {
+            "init-pulsar": {
+               "command": [
+                  "sh",
+                  "-c",
+                  "pulsar-admin --admin-url http://pulsar:8080 tenants create tg && pulsar-admin --admin-url http://pulsar:8080 namespaces create tg/flow && pulsar-admin --admin-url http://pulsar:8080 namespaces create tg/request && pulsar-admin --admin-url http://pulsar:8080 namespaces create tg/response && pulsar-admin --admin-url http://pulsar:8080 namespaces set-retention --size -1 --time 3m tg/response"
+               ],
+               "depends_on": {
+                  "pulsar": {
+                     "condition": "service_started"
+                  }
+               },
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/apachepulsar/pulsar:3.3.1",
+               "restart": "on-failure:100"
+            },
+            "pulsar": {
+               "command": "bin/pulsar standalone",
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "1.0",
+                        "memory": "900M"
+                     },
+                     "reservations": {
+                        "cpus": "0.5",
+                        "memory": "900M"
+                     }
+                  }
+               },
+               "environment": {
+                  "PULSAR_MEM": "-Xms700M -Xmx700M"
+               },
+               "image": "docker.io/apachepulsar/pulsar:3.3.1",
+               "ports": [
+                  "6650:6650",
+                  "8080:8080"
+               ],
+               "restart": "on-failure:100",
+               "volumes": [
+                  "pulsar-conf:/pulsar/conf",
+                  "pulsar-data:/pulsar/data"
+               ]
+            },
+            "pulsar-manager": {
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "1.4G"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "1.4G"
+                     }
+                  }
+               },
+               "environment": {
+                  "SPRING_CONFIGURATION_FILE": "/pulsar-manager/pulsar-manager/application.properties"
+               },
+               "image": "docker.io/apachepulsar/pulsar-manager:v0.4.0",
+               "ports": [
+                  "9527:9527",
+                  "7750:7750"
+               ],
+               "restart": "on-failure:100"
+            }
+         },
+         "volumes": {
+            "pulsar-conf": { },
+            "pulsar-data": { }
+         }
+      },
+      "pattern": {
+         "args": [
+            {
+               "default": "admin98414",
+               "description": "Admin password to apply",
+               "name": "default-admin-password",
+               "required": true,
+               "type": "string",
+               "width": 20
+            }
+         ],
+         "description": "Adds Pulsar Manager which provides a web interface to manage Pulsar.  Pulsar Manager is a large container and deployment requiring over 1GB of RAM, so is not deployed by default",
+         "features": [
+            "pulsar-manager"
+         ],
+         "name": "pulsar-manager",
+         "requires": [
+            "pulsar"
+         ],
+         "title": "Deploy Pulsar manager"
+      }
+   },
+   {
+      "module": {
+         "services": {
+            "etcd": {
+               "command": [
+                  "etcd",
+                  "-advertise-client-urls=http://127.0.0.1:2379",
+                  "-listen-client-urls",
+                  "http://0.0.0.0:2379",
+                  "--data-dir",
+                  "/etcd"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "1.0",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.25",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "environment": {
+                  "ETCD_AUTO_COMPACTION_MODE": "revision",
+                  "ETCD_AUTO_COMPACTION_RETENTION": "1000",
+                  "ETCD_QUOTA_BACKEND_BYTES": "4294967296",
+                  "ETCD_SNAPSHOT_COUNT": "50000"
+               },
+               "image": "quay.io/coreos/etcd:v3.5.15",
+               "ports": [
+                  "2379:2379"
+               ],
+               "restart": "on-failure:100",
+               "volumes": [
+                  "etcd:/etcd"
+               ]
+            },
+            "milvus": {
+               "command": [
+                  "milvus",
+                  "run",
+                  "standalone"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "1.0",
+                        "memory": "256M"
+                     },
+                     "reservations": {
+                        "cpus": "0.5",
+                        "memory": "256M"
+                     }
+                  }
+               },
+               "environment": {
+                  "ETCD_ENDPOINTS": "etcd:2379",
+                  "MINIO_ADDRESS": "minio:9000"
+               },
+               "image": "docker.io/milvusdb/milvus:v2.4.9",
+               "ports": [
+                  "9091:9091",
+                  "19530:19530"
+               ],
+               "restart": "on-failure:100",
+               "volumes": [
+                  "milvus:/var/lib/milvus"
+               ]
+            },
+            "minio": {
+               "command": [
+                  "minio",
+                  "server",
+                  "/minio_data",
+                  "--console-address",
+                  ":9001"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.25",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "environment": {
+                  "MINIO_ROOT_PASSWORD": "minioadmin",
+                  "MINIO_ROOT_USER": "minioadmin"
+               },
+               "image": "docker.io/minio/minio:RELEASE.2024-08-17T01-24-54Z",
+               "ports": [
+                  "9001:9001"
+               ],
+               "restart": "on-failure:100",
+               "volumes": [
+                  "minio-data:/minio_data"
+               ]
+            },
+            "query-graph-embeddings": {
+               "command": [
+                  "ge-query-milvus",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-t",
+                  "http://milvus:19530"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "store-graph-embeddings": {
+               "command": [
+                  "ge-write-milvus",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-t",
+                  "http://milvus:19530"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            }
+         },
+         "volumes": {
+            "etcd": { },
+            "milvus": { },
+            "minio-data": { }
+         }
+      },
+      "pattern": {
+         "args": [ ],
+         "description": "Adds the Milvus open-source vector DB",
+         "features": [
+            "milvus",
+            "vectordb"
+         ],
+         "name": "vector-store-milvus",
+         "requires": [
+            "pulsar",
+            "trustgraph"
+         ],
+         "title": "Deploy a vector store using Milvus"
+      }
+   },
+   {
+      "module": {
+         "services": {
+            "qdrant": {
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "1.0",
+                        "memory": "256M"
+                     },
+                     "reservations": {
+                        "cpus": "0.5",
+                        "memory": "256M"
+                     }
+                  }
+               },
+               "image": "docker.io/qdrant/qdrant:v1.11.1",
+               "ports": [
+                  "6333:6333",
+                  "6334:6334"
+               ],
+               "restart": "on-failure:100",
+               "volumes": [
+                  "qdrant:/qdrant/storage"
+               ]
+            },
+            "query-graph-embeddings": {
+               "command": [
+                  "ge-query-qdrant",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-t",
+                  "http://qdrant:6333"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            },
+            "store-graph-embeddings": {
+               "command": [
+                  "ge-write-qdrant",
+                  "-p",
+                  "pulsar://pulsar:6650",
+                  "-t",
+                  "http://qdrant:6333"
+               ],
+               "deploy": {
+                  "resources": {
+                     "limits": {
+                        "cpus": "0.5",
+                        "memory": "128M"
+                     },
+                     "reservations": {
+                        "cpus": "0.1",
+                        "memory": "128M"
+                     }
+                  }
+               },
+               "image": "docker.io/trustgraph/trustgraph-flow:0.8.0",
+               "restart": "on-failure:100"
+            }
+         },
+         "volumes": {
+            "qdrant": { }
+         }
+      },
+      "pattern": {
+         "args": [ ],
+         "description": "Adds the Qdrant open-source vector DB",
+         "features": [
+            "qdrant",
+            "vectordb"
+         ],
+         "name": "vector-store-qdrant",
+         "requires": [
+            "pulsar",
+            "trustgraph"
+         ],
+         "title": "Deploy a vector store using Qdrant"
       }
    }
 ]
