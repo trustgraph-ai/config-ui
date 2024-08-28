@@ -1,0 +1,78 @@
+
+.card {
+    padding: 2rem;
+    margin: 2rem;
+    border: 1px solid #f0f0e0;
+    background-color: #fcfcfc;
+}
+
+.config-editor {
+
+    display: flex;
+    flex-wrap: none;
+    justify-content: space-evenly;
+    margin: 1rem;
+    width: 90%;
+
+    .selected {
+        font-weight: bold;
+        color: #800000;
+    }
+
+    .selection-box {
+
+        .selection-field {
+            padding: 0.3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            div {
+                padding: .8rem;
+                margin: 0.4rem;
+            }
+
+            :nth-child(1) {
+                width: 20rem;
+                text-align: left;
+            }
+
+            div:nth-child(2) {
+                width: 12rem;
+            }
+
+            div:nth-child(3) {
+                width: 5rem;
+            }
+
+            div:nth-child(2) span.dep {
+
+                color: white;
+                font-size: small;
+                white-space: nowrap;
+                display: block-inline;
+                background-color: #202010;
+                padding: 0.4rem;
+                margin: 0.2rem;
+                border-radius: 8px;
+
+            }
+
+        }
+
+    }
+
+    .item-editor {
+
+        width: 45rem;
+
+        textarea {
+            width: 40rem;
+            height: 5rem;
+        } 
+
+    }
+
+
+}
+
