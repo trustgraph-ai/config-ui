@@ -1,6 +1,7 @@
 
 import Available from './Available';
 import Selected from './Selected';
+import ItemEditor from './ItemEditor';
 
 function Selection({
     available, unavailable, configuration, add, remove, selection, select,
@@ -17,7 +18,7 @@ function Selection({
                 selection={selection}
                 patterns={patterns}
             />
-
+{/*
             <Available
                 available={available}
                 unavailable={unavailable}
@@ -26,6 +27,14 @@ function Selection({
                 selection={selection}
                 patterns={patterns}
             />
+            */
+            }
+                <ItemEditor
+                    configuration={configuration}
+                    selection={selection}
+                    select={select}
+                    patterns={patterns}
+                />
 
         </div>
     );

@@ -1,4 +1,6 @@
 
+import ItemEditor from './ItemEditor';
+
 function Selection({configuration, remove, select, selected, patterns}) {
 
     if (configuration.length == 0) return (

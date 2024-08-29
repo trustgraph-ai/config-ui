@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import './ConfigEditor.scss';
 import Selection from './Selection';
+import Available from './Available';
 import ItemEditor from './ItemEditor';
 import rawPatterns from './patterns.json';
 
@@ -128,12 +129,23 @@ function ConfigEditor() {
                     select={select}
                     patterns={patterns}
                 />	     
+
+            <Available
+                available={available}
+                unavailable={unavailable}
+                add={add}
+                select={select}
+                selection={selection}
+                patterns={patterns}
+            />
+{/*
                 <ItemEditor
                     configuration={configuration}
                     selection={selection}
                     select={select}
                     patterns={patterns}
                 />
+                */}
             </div>
         </>
   )
