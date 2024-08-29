@@ -3,7 +3,52 @@ import { useState } from 'react';
 import './ConfigEditor.scss';
 import Selection from './Selection';
 import ItemEditor from './ItemEditor';
-import patterns from './patterns.json';
+import rawPatterns from './patterns.json';
+
+// 🤖⛭
+//
+
+const icons = {
+    "trustgraph-base": "🤝😂",
+    "pulsar": "🌟☄️",
+    "azure": "🤖💬",
+    "bedrock": "🤖💬",
+    "cohere": "🤖💬",
+    "claude": "🤖💬",
+    "ollama": "🤖💬",
+    "openai": "🤖💬",
+    "vertexai": "🤖💬",
+    "vector-store-milvus": "❓🌐",
+    "vector-store-qdrant": "❓🌐",
+    "graph-rag-cassandra": "🖇️🙋‍♀️",
+    "graph-rag-neo4j": "🖇️🙋‍♀️",
+    "kq-query-prompt": "📜️️💬",
+    "extraction-definition-prompt": "📜️️💬",
+    "extraction-relationship-prompt": "📜️️💬",
+    "prompt-template-document-query": "📜️💬",
+    "prompt-template-rows-template": "📜️💬",
+    "override-recursive-chunker": "✂️🪚",
+    "pulsar-manager": "🕴🏻🛃",
+};
+
+const patterns = rawPatterns.map(
+    p => {
+
+        if (p.pattern.name in icons) {
+            return {
+                ...p,
+                pattern: {
+                   ...p.pattern,
+                   title: icons[p.pattern.name] + " " + p.pattern.title,
+                }
+            }
+        }
+
+        return p;
+    }
+)
+
+console.log(patterns);
 
 function dependenciesMet(pattern, features) {
 
