@@ -2,55 +2,77 @@
 import Available from './Available';
 import Selected from './Selected';
 
-function Args({selection}) {
+function change(pattern, field, value, parameters, setParameters) {
+    const newParams = {
+       ...parameters,
+       [pattern]: {
+           ...parameters[pattern],
+           [field]: value,
+       }
+    };
+    setParameters(newParams);
+}
+
+function Args({selection, parameters, setParameters}) {
 
     return selection.pattern.args.map(
         field => 
-            <div key={field.name}>
+            <div key={selection.pattern.name + "//" + field.name}>
                 <div>{field.description}</div>
+                <div>{selection.pattern.name}</div>
+                <div>{field.name}</div>
                 <div>
-                    <textarea defaultValue={field.default}/>
+                    <textarea
+                        defaultValue={parameters[selection.pattern.name][field.name]}
+                        onChange={e => change(selection.pattern.name, field.name, e.target.value, parameters, setParameters)}
+                    />
                 </div>
             </div>
     );
 
 }
 
-function Items({selection, inConfig}) {
+function ItemParameters({
+    selection, configuration, parameters, setParameters,
+}) {
 
     if (!selection) return;
+
+    const patternsInConfig = new Set<string>(configuration);
+
+    if (!(selection.pattern.name in parameters)) {
+        parameters = {
+            ...parameters,
+            [selection.pattern.name]: {}
+        };
+    }
+
+    let sparams = parameters[selection.pattern.name];
+
+    selection.pattern.args.map(
+        field => {
+            if (!(field.name in sparams))
+                sparams[field.name] = field.default;
+        }
+    );
+
+    const inConfig = patternsInConfig.has(selection);
 
     return (
         <>
             <h2>{selection.pattern.title}</h2>
             <p>{selection.pattern.description}</p>
-            { (inConfig) ? ( <Args selection={selection}/> ) : null }
+            { (inConfig) ? ( <Args selection={selection} parameters={parameters} setParameters={setParameters}/> ) : null }
         </>
         
     );
 
 }
 
-function ItemParameters({selection, select, patterns, configuration}) {
-
-    const patternsInConfig = new Set<string>(configuration);
-
-    const inConfig = patternsInConfig.has(selection);
-
-    return (
-        <div className="card item-editor">
-
-          <Items
-              selection={selection}
-              inConfig={inConfig}
-          />
-
-        </div>
-    );
-
-}
-
-function Parameters({selection, select, patterns, configuration, deployment}) {
+function Parameters({
+    selection, select, patterns, configuration, deployment,
+    parameters, setParameters,
+}) {
 
     if (deployment)
         return (
@@ -59,11 +81,20 @@ function Parameters({selection, select, patterns, configuration, deployment}) {
                 <pre>{deployment}</pre>
             </div>
         );
-    
+
     return (
-        ItemParameters({
-            selection, select, patterns, configuration, deployment
-        })
+
+        <div className="card item-editor">
+
+        <ItemParameters
+            selection={selection}
+            configuration={configuration}
+            parameters={parameters}
+            setParameters={setParameters}
+            />
+
+        </div>
+        
     );
 
 }

@@ -27,6 +27,7 @@ function ConfigEditor() {
     const [configuration, setConfiguration] = useState([]);
     const [selection, setSelection] = useState(null);
     const [deployment, setDeployment] = useState(null);
+    const [parameters, setParameters] = useState({});
 
     const patternMap = new Map<string, any>(
 	patterns.map(obj => [obj.pattern.name, obj])
@@ -94,6 +95,8 @@ function ConfigEditor() {
                     patterns={patterns}
                     deploy={deploy}
                     deployment={deployment}
+                    parameters={parameters}
+                    setParameters={setParameters}
                 />
 
                 <Catalog

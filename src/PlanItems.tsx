@@ -1,6 +1,7 @@
 
 function PlanItems({
-    configuration, remove, select, selected, patterns, deploy
+    configuration, remove, select, selected, patterns, deploy, parameters,
+    setParameters,
 }) {
 
     if (configuration.length == 0) return (
