@@ -3,8 +3,7 @@ import PlanItems from './PlanItems';
 import Parameters from './Parameters';
 
 function Plan({
-    available, unavailable, configuration, add, remove, selection, select,
-    patterns
+    configuration, remove, selection, select, patterns, deploy, deployment
 }) {
 
     return (
@@ -16,6 +15,7 @@ function Plan({
                 select={select}
                 selection={selection}
                 patterns={patterns}
+                deploy={deploy}
             />
 
             <Parameters
@@ -23,9 +23,11 @@ function Plan({
                 selection={selection}
                 select={select}
                 patterns={patterns}
+                deployment={deployment}
             />
 
         </div>
+
     );
 
 }

@@ -26,6 +26,7 @@ function ConfigEditor() {
 
     const [configuration, setConfiguration] = useState([]);
     const [selection, setSelection] = useState(null);
+    const [deployment, setDeployment] = useState(null);
 
     const patternMap = new Map<string, any>(
 	patterns.map(obj => [obj.pattern.name, obj])
@@ -47,10 +48,16 @@ function ConfigEditor() {
 
     function select(pattern) {
         setSelection(pattern);
+        setDeployment(null);
+    }
+
+    function deploy() {
+        setDeployment("Launch");
     }
 
     function add(x) {
         setConfiguration([...configuration, patternMap.get(x)]);
+        setDeployment(null);
     }
 
     function remove(x) {
@@ -67,6 +74,7 @@ function ConfigEditor() {
 
         setSelection(null);
         setConfiguration(cfg);
+        setDeployment(null);
 
     }
 
@@ -84,7 +92,9 @@ function ConfigEditor() {
                     selection={selection}
                     select={select}
                     patterns={patterns}
-                />	     
+                    deploy={deploy}
+                    deployment={deployment}
+                />
 
                 <Catalog
                     available={available}

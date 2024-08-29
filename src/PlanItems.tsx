@@ -1,5 +1,7 @@
 
-function PlanItems({configuration, remove, select, selected, patterns}) {
+function PlanItems({
+    configuration, remove, select, selected, patterns, deploy
+}) {
 
     if (configuration.length == 0) return (
         <div className="card plan-items">
@@ -32,7 +34,7 @@ function PlanItems({configuration, remove, select, selected, patterns}) {
                             <div>{n.pattern.icon} {n.pattern.title}</div>
                             <div>
                                 <button onClick={() => select(n)}>
-                                    info
+                                    parameters
                                 </button>
                                 <button onClick={() => remove(n)}>
                                     remove
@@ -42,6 +44,12 @@ function PlanItems({configuration, remove, select, selected, patterns}) {
                         </div>
                     ))
                 }
+
+           <div>
+               <button onClick={() => deploy()}>
+                   Create deployable configuration
+               </button>
+           </div>
 
         </div>
     );

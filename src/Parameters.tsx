@@ -31,7 +31,7 @@ function Items({selection, inConfig}) {
 
 }
 
-function Selection({selection, select, patterns, configuration}) {
+function ItemParameters({selection, select, patterns, configuration}) {
 
     const patternsInConfig = new Set<string>(configuration);
 
@@ -50,5 +50,23 @@ function Selection({selection, select, patterns, configuration}) {
 
 }
 
-export default Selection;
+function Parameters({selection, select, patterns, configuration, deployment}) {
+
+    if (deployment)
+        return (
+            <div className="card item-editor">
+                <h2>Deployment configuration</h2>
+                <pre>{deployment}</pre>
+            </div>
+        );
+    
+    return (
+        ItemParameters({
+            selection, select, patterns, configuration, deployment
+        })
+    );
+
+}
+
+export default Parameters;
 
