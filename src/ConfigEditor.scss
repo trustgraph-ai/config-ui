@@ -12,36 +12,34 @@
     flex-direction: column;
     flex-wrap: nowrap;
     justify-content: space-evenly;
-    margin: 1rem;
-    width: 80%;
+    margin: auto;
+    width: 90%;
 
-    .selected {
-        font-weight: bold;
-        color: #800000;
-    }
+    .plan {
 
-    .selection-box {
+        display: flex;
+	flex-wrap: nowrap;
+	row-gap: 0.2rem;
+        width: 100%;
 
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	row-gap: 0.5rem;
-	column-gap: 0.5rem;
-
-        &.configuration {
+        .plan-items {
 
             display: flex;
 	    flex-wrap: nowrap;
 	    flex-direction: column;
 	    row-gap: 0.2rem;
+            width: 40%;
 
-            .selection-field {
+            .plan-item {
 
                 display: flex;
                 flex-wrap: no-wrap;
                 align-items: center;
                 width: 35rem;
 	        column-gap: 1rem;
+                border: 1px solid black;
+	        border-radius: 8px;
+                padding: 0.8rem;
 
                 & > :nth-child(1) {
                     flex-grow: 1;
@@ -50,23 +48,42 @@
                 div {
                     display: flex;
                     flex-wrap: no-wrap;
-//	            row-gap: 0.2rem;
-//	            column-gap: 0.1rem;
                 }
-
+                
             }
+        }
+        
+        .item-editor {
+
+            width: 45rem;
+
+            textarea {
+                width: 60%;
+                height: 15rem;
+            } 
 
         }
 
-        .selection-field {
+    }
 
-            display: grid;
-            border: 1px solid black;
-//	    row-gap: 0.2rem;
-//	    column-gap: 0.1rem;
-	    width: 19rem;
-	    border-radius: 8px;
-            padding: 0.8rem;
+    .catalog {
+
+
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	row-gap: 0.5rem;
+	column-gap: 0.5rem;
+
+
+        .catalog-item {
+
+        display: grid;
+        border: 1px solid black;
+	width: 19rem;
+	border-radius: 8px;
+        padding: 0.8rem;
+
 
             & > div {
             }
@@ -100,20 +117,7 @@
                     border-radius: 8px;
                 }
             }
-
-
         }
-
-    }
-
-    .item-editor {
-
-        width: 45rem;
-
-        textarea {
-            width: 45rem;
-            height: 15rem;
-        } 
 
     }
 

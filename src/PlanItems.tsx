@@ -2,7 +2,7 @@
 function PlanItems({configuration, remove, select, selected, patterns}) {
 
     if (configuration.length == 0) return (
-        <div className="card">
+        <div className="card plan-items">
             <h2>Get started</h2>
             <p>
                 This is an empty configuraton. To get started you should start
@@ -20,16 +20,14 @@ function PlanItems({configuration, remove, select, selected, patterns}) {
     );
 
     return (
-        <div className="card">
+        <div className="card plan-items">
 
             <h2>Your configuration patterns</h2>
-
-            <div className="plan-items">
 
                 {
                     configuration.map(n => (
                         <div key={n.pattern.name}
-                            className={(n == selected) ? "selection-field selected" : "selection-field"}
+                            className={(n == selected) ? "plan-item selected" : "plan-item"}
                             >
                             <div>{n.pattern.title}</div>
                             <div>
@@ -44,8 +42,6 @@ function PlanItems({configuration, remove, select, selected, patterns}) {
                         </div>
                     ))
                 }
-
-            </div>
 
         </div>
     );

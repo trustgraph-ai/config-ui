@@ -117,8 +117,9 @@ function ConfigEditor() {
 
     return (
         <>
-            <h1>Config editor</h1>
             <div className="config-editor">
+
+                <h1>Config editor</h1>
 
                 <Plan
                     available={available} unavailable={unavailable}
