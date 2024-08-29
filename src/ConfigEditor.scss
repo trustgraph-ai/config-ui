@@ -9,10 +9,9 @@
 .config-editor {
 
     display: flex;
-    flex-wrap: none;
+    flex-wrap: nowrap;
     justify-content: space-evenly;
     margin: 1rem;
-//    width: 90%;
 
     .selected {
         font-weight: bold;
@@ -28,8 +27,34 @@
 	column-gap: 1rem;
 	width: 42rem;
 
+        &.configuration {
+
+	    flex-wrap: nowrap;
+	    flex-direction: column;
+            display: flex;
+
+            .selection-field {
+
+                display: flex;
+                flex-wrap: no-wrap;
+                align-items: center;
+                width: 35rem;
+
+                & > :nth-child(1) {
+                    flex-grow: 1;
+                }
+
+                div {
+                    display: flex;
+                    flex-wrap: no-wrap;
+                }
+
+            }
+
+        }
+
         .selection-field {
-            padding: 0.3rem;
+
             display: grid;
             border: 1px solid black;
 	    row-gap: 0.1rem;
@@ -37,39 +62,33 @@
 	    width: 19rem;
 	    border-radius: 8px;
 
-	    &.unavailable {
-		color: #e0a0a0;
-		text-decoration: line-through;
-	    }
-
             & > div {
                 padding: 0.2rem;
                 margin: 0.2rem;
             }
 
+	    &.unavailable > div {
+		color: #b0a0a0;
+		text-decoration: line-through;
+	    }
+
             & > :nth-child(1) {
-//                width: 20rem;
             }
 
             & > div:nth-child(2) {
-//                width: 12rem;
             }
 
             & > div:nth-child(3) {
 
-//                width: 12rem;
-
                 & > span.dep {
-
                     color: white;
-                    font-size: small;
+                    font-size: x-small;
                     white-space: nowrap;
                     display: block-inline;
                     background-color: #202010;
-                    padding: 0.4rem;
+                    padding: 0.2rem;
                     margin: 0.2rem;
                     border-radius: 8px;
-
                 }
             }
 
