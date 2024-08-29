@@ -49,8 +49,8 @@
                 div {
                     display: flex;
                     flex-wrap: no-wrap;
-	            row-gap: 0.2rem;
-	            column-gap: 0.1rem;
+//	            row-gap: 0.2rem;
+//	            column-gap: 0.1rem;
                 }
 
             }
@@ -61,18 +61,22 @@
 
             display: grid;
             border: 1px solid black;
-	    row-gap: 0.2rem;
-	    column-gap: 0.1rem;
+//	    row-gap: 0.2rem;
+//	    column-gap: 0.1rem;
 	    width: 19rem;
 	    border-radius: 8px;
+            padding: 0.8rem;
 
             & > div {
-                padding: 0.4rem;
             }
 
-	    &.unavailable > div {
-		color: #b0a0a0;
-		text-decoration: line-through;
+	    &.unavailable {
+
+                border: 1px solid #a0a0a0;
+
+                > div {
+		    color: #808080;
+                }
 	    }
 
             & > :nth-child(1) {
@@ -85,11 +89,12 @@
 
                 & > span.dep {
                     color: white;
-                    font-size: x-small;
+                    font-size: small;
+                    font-weight: bold;
                     white-space: nowrap;
                     display: block-inline;
-                    background-color: #202010;
-                    padding: 0.2rem;
+                    background-color: #808080;
+                    padding: 0.4rem;
                     margin: 0.2rem;
                     border-radius: 8px;
                 }
