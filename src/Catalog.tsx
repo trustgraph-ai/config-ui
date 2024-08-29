@@ -28,11 +28,9 @@ function Available({
                             className="catalog-item available"
                             key={n.pattern.name}
                         >
-                            <div>{n.pattern.title}</div>
-                            <div>
-                                <button onClick={() => select(n)}>
-                                    info
-                                </button>
+                            <div className="title">{n.pattern.title}</div>
+                            <div className="description">{n.pattern.description}</div>
+                            <div className="additional">
 				<button onClick={() => add(n.pattern.name)}>
 				    add
 				</button>
@@ -48,13 +46,9 @@ function Available({
                             className="catalog-item unavailable"
                             key={n.pattern.name}
                         >
-                            <div>{n.pattern.title}</div>
-			    <div>
-                                <button onClick={() => select(n)}>
-                                    info
-                                </button>
-			    </div>
-                            <div>
+                            <div className="title">{n.pattern.title}</div>
+                            <div className="description">{n.pattern.description}</div>
+                            <div className="additional">
                             {
 
                                 n.pattern.requires.map(
