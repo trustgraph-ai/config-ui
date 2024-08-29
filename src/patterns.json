@@ -482,7 +482,7 @@
             "neo4j",
             "rag"
          ],
-         "name": "graph-rag-cassandra",
+         "name": "graph-rag-neo4j",
          "requires": [
             "pulsar",
             "trustgraph"
@@ -1764,7 +1764,7 @@
          "features": [
             "llm"
          ],
-         "name": "bedrock",
+         "name": "cohere",
          "requires": [
             "pulsar",
             "trustgraph"
