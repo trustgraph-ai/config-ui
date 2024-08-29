@@ -1,9 +1,8 @@
 
 import { useState } from 'react';
 import './ConfigEditor.scss';
-import Selection from './Selection';
-import Available from './Available';
-import ItemEditor from './ItemEditor';
+import Plan from './Plan';
+import Catalog from './Catalog';
 import rawPatterns from './patterns.json';
 
 // 🤖⛭
@@ -120,7 +119,8 @@ function ConfigEditor() {
         <>
             <h1>Config editor</h1>
             <div className="config-editor">
-                <Selection
+
+                <Plan
                     available={available} unavailable={unavailable}
                     configuration={configuration}
                     add={add}
@@ -130,22 +130,15 @@ function ConfigEditor() {
                     patterns={patterns}
                 />	     
 
-            <Available
-                available={available}
-                unavailable={unavailable}
-                add={add}
-                select={select}
-                selection={selection}
-                patterns={patterns}
-            />
-{/*
-                <ItemEditor
-                    configuration={configuration}
-                    selection={selection}
+                <Catalog
+                    available={available}
+                    unavailable={unavailable}
+                    add={add}
                     select={select}
+                    selection={selection}
                     patterns={patterns}
                 />
-                */}
+
             </div>
         </>
   )

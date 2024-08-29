@@ -1,7 +1,5 @@
 
-import ItemEditor from './ItemEditor';
-
-function Selection({configuration, remove, select, selected, patterns}) {
+function PlanItems({configuration, remove, select, selected, patterns}) {
 
     if (configuration.length == 0) return (
         <div className="card">
@@ -26,7 +24,7 @@ function Selection({configuration, remove, select, selected, patterns}) {
 
             <h2>Your configuration patterns</h2>
 
-            <div className="selection-box configuration">
+            <div className="plan-items">
 
                 {
                     configuration.map(n => (
@@ -54,5 +52,5 @@ function Selection({configuration, remove, select, selected, patterns}) {
 
 }
 
-export default Selection;
+export default PlanItems;
 

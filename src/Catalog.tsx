@@ -18,7 +18,7 @@ function Available({
     return (
         <div className="card">
 
-            <h2>Available configuration patterns</h2>
+            <h2>Configuration pattern catalog</h2>
 
             <div className="selection-box available">
 
