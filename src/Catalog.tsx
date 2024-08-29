@@ -28,7 +28,7 @@ function Available({
                             className="catalog-item available"
                             key={n.pattern.name}
                         >
-                            <div className="title">{n.pattern.title}</div>
+                            <div className="title">{n.pattern.icon} {n.pattern.title}</div>
                             <div className="description">{n.pattern.description}</div>
                             <div className="additional">
 				<button onClick={() => add(n.pattern.name)}>
@@ -46,7 +46,7 @@ function Available({
                             className="catalog-item unavailable"
                             key={n.pattern.name}
                         >
-                            <div className="title">{n.pattern.title}</div>
+                            <div className="title">{n.pattern.icon} {n.pattern.title}</div>
                             <div className="description">{n.pattern.description}</div>
                             <div className="additional">
                             {

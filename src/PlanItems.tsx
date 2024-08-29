@@ -29,7 +29,7 @@ function PlanItems({configuration, remove, select, selected, patterns}) {
                         <div key={n.pattern.name}
                             className={(n == selected) ? "plan-item selected" : "plan-item"}
                             >
-                            <div>{n.pattern.title}</div>
+                            <div>{n.pattern.icon} {n.pattern.title}</div>
                             <div>
                                 <button onClick={() => select(n)}>
                                     info
