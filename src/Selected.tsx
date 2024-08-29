@@ -24,7 +24,7 @@ function Selection({configuration, remove, select, selected, patterns}) {
 
             <h2>Your configuration patterns</h2>
 
-            <div className="selection-box">
+            <div className="selection-box configuration">
 
                 {
                     configuration.map(n => (

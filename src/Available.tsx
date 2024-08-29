@@ -20,12 +20,12 @@ function Available({
 
             <h2>Available configuration patterns</h2>
 
-            <div className="selection-box">
+            <div className="selection-box available">
 
                 {
                     available.map(n => (
                         <div
-                            className="selection-field"
+                            className="selection-field available"
                             key={n.pattern.name}
                         >
                             <div>{n.pattern.title}</div>
@@ -45,7 +45,7 @@ function Available({
                 {
                     unavailable.map(n => (
                         <div
-                            className="selection-field"
+                            className="selection-field unavailable"
                             key={n.pattern.name}
                         >
                             <div>{n.pattern.title}</div>
