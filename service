@@ -12,7 +12,7 @@ logger.setLevel(logging.INFO)
 
 class Generator:
 
-    def __init__(self, config, base="../pulsar3/templates/"):
+    def __init__(self, config, base="./templates/"):
         self.jsonnet_base = base
         self.config = config
 
@@ -109,7 +109,7 @@ class Api:
 
         gen = Generator(config)
 
-        with open("../pulsar3/templates/config-loader.jsonnet", "r") as f:
+        with open("./templates/config-loader.jsonnet", "r") as f:
             wrapper = f.read()
         processed = gen.process(wrapper)
 
