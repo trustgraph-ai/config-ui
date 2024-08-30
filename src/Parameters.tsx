@@ -78,7 +78,7 @@ function Parameters({
         return (
             <div className="card item-editor">
                 <h2>Deployment configuration</h2>
-                <textarea>{deployment}</textarea>
+                <textarea value={deployment} readOnly={true}/>
             </div>
         );
 

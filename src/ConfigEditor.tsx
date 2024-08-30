@@ -65,6 +65,23 @@ function ConfigEditor() {
     }
 
     function add(x) {
+
+        const pattern = patternMap.get(x);
+        const name = pattern.pattern.name;
+
+        if (!(name in parameters)) {
+            let sparams = {}
+            pattern.pattern.args.map(
+                field => {
+                    if (field.default)
+                        sparams[field.name] = field.default;
+                    else
+                        sparams[field.name] = "";
+                }
+            );
+            parameters[name] = sparams;
+        }
+
         setConfiguration([...configuration, patternMap.get(x)]);
         setDeployment(null);
     }

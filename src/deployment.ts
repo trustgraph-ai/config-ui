@@ -35,17 +35,24 @@ export function generateDeployment({patterns, configuration, parameters}) {
             Object.entries(parameters[name]).forEach(
                 ([p, v]) => {
 
-                    v = v.replace(/\n/g, "\\n");
-                    v = v.replace(/"/g, "\\\"");
+                    if (!v) return;
+                    if (v == "") return;
 
-                    depl += `\n    .with("${p}", "${v}")`;
+                    if (typeof(v) == "string") {
+                        v = v.replace(/\n/g, "\\n");
+                        v = v.replace(/"/g, "\\\"");
+                    }
+
+                    v = JSON.stringify(v);
+
+                    depl += `\n    .with("${p}", ${v})`;
 
                 }
             );
         }
     }
 
-    depl += ";\n";
+    depl += "\n";
 
     return depl;
 
