@@ -50,25 +50,60 @@ class Api:
             self.config = {}
 
         self.port = int(self.config.get("port", "8080"))
-
         self.gen = Generator()
-
         self.app = web.Application(middlewares=[])
 
         self.app.add_routes([web.post("/api/generate", self.generate)])
+        self.app.add_routes([web.get("/{tail:.*}", self.everything)])
+
+    async def everything(self, request):
+
+        if ".." in request.path:
+            return web.HTTPNotFound()
+
+        if request.path == "/":
+            with open("dist/index.html", "r") as f:
+                return web.Response(
+                    text=f.read(), content_type="text/html"
+                )
+
+        print(request.path)
+
+        if request.path.endswith(".css"):
+            with open("dist" + request.path, "r") as f:
+                data = f.read()
+            return web.Response(
+                text=data, content_type="text/css"
+            )
+
+        if request.path.endswith(".js"):
+            with open("dist" + request.path, "r") as f:
+                data = f.read()
+            return web.Response(
+                text=data, content_type="text/javascript"
+            )
+
+        if request.path.endswith(".html"):
+            with open("dist" + request.path, "r") as f:
+                data = f.read()
+            return web.Response(
+                text=data, content_type="text/html"
+            )
+
+        return web.HTTPNotFound()
 
     async def generate(self, request):
 
-        print("Request...")
+        print("Generate...")
         config = await request.text()
 
         next = self.gen.process(config)
 
         print(next)
 
-        return web.json_response({
-            "thing": "Hello world"
-        })
+        return web.Response(
+            text=json.dumps(next), content_type = "text/plain"
+        )
 
     def run(self):
 
