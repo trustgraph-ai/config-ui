@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+
+import _jsonnet as j
+from aiohttp import web
+import logging
+import os
+import json
+
+logger = logging.getLogger("service")
+logger.setLevel(logging.INFO)
+
+class Generator:
+
+    def __init__(self, base="../pulsar3/templates/"):
+        self.jsonnet_base = base
+
+    def process(self, config):
+
+        res = j.evaluate_snippet("config", config, import_callback=self.load)
+        return json.loads(res)
+
+    def load(self, dir, filename):
+
+        logger.debug("Request jsonnet: %s %s", dir, filename)
+
+        try:
+            if dir:
+                path = os.path.join(".", dir, filename)
+            else:
+                path = os.path.join(self.jsonnet_base, filename)
+
+            logger.debug("Try: %s", path)
+            with open(path, "rb") as f:
+                logger.debug("Loaded: %s", path)
+                return str(path), f.read()
+
+        except:
+            path = os.path.join(self.jsonnet_base, filename)
+            logger.debug("Try: %s", path)
+            with open(path, "rb") as f:
+                logger.debug("Loaded: %s", path)
+                return str(path), f.read()
+
+class Api:
+    def __init__(self, config=None):
+
+        if config:
+            self.config = config
+        else:
+            self.config = {}
+
+        self.port = int(self.config.get("port", "8080"))
+
+        self.gen = Generator()
+
+        self.app = web.Application(middlewares=[])
+
+        self.app.add_routes([web.post("/api/generate", self.generate)])
+
+    async def generate(self, request):
+
+        print("Request...")
+        config = await request.text()
+
+        next = self.gen.process(config)
+
+        print(next)
+
+        return web.json_response({
+            "thing": "Hello world"
+        })
+
+    def run(self):
+
+        web.run_app(self.app, port=self.port)
+
+a = Api()
+
+a.run()
+
