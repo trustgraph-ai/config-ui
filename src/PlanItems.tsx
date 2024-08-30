@@ -1,8 +1,9 @@
 
+import { Pattern } from './Pattern';
+
 function PlanItems({
-    configuration, remove, select, selected, patterns, deploy, parameters,
-    setParameters,
-}) {
+    configuration, remove, select, selected, deploy
+} : any) {
 
     if (configuration.length == 0) return (
         <div className="card plan-items">
@@ -28,7 +29,7 @@ function PlanItems({
             <h2>Your configuration patterns</h2>
 
                 {
-                    configuration.map(n => (
+                    configuration.map((n : Pattern) => (
                         <div key={n.pattern.name}
                             className={(n == selected) ? "plan-item selected" : "plan-item"}
                             >

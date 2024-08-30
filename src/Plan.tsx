@@ -5,7 +5,7 @@ import Parameters from './Parameters';
 function Plan({
     configuration, remove, selection, select, patterns, deploy, deployment,
     parameters, setParameters
-}) {
+} : any) {
 
     return (
         <div className="section plan">

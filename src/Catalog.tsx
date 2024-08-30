@@ -1,16 +1,17 @@
 
 function Available({
-    available, unavailable, add, select, selection, patterns
-}) {
+    available, unavailable, add, patterns
+} : any) {
 
     let featureMap = new Map<string, any>();
 
-    patterns.map(p =>
-        p.pattern.features.map(
-            f => {
-                featureMap.set(f, p.pattern.title);
-            }
-        )
+    patterns.map(
+        (p : any) =>
+            p.pattern.features.map(
+                (f : any) => {
+                    featureMap.set(f, p.pattern.title);
+                }
+            )
     );
 
     if (available.length == 0 && unavailable.length == 0) return null;
@@ -23,7 +24,7 @@ function Available({
             <div className="catalog">
 
                 {
-                    available.map(n => (
+                    available.map((n : any) => (
                         <div
                             className="catalog-item available"
                             key={n.pattern.name}
@@ -41,7 +42,7 @@ function Available({
                 }
 
                 {
-                    unavailable.map(n => (
+                    unavailable.map((n : any) => (
                         <div
                             className="catalog-item unavailable"
                             key={n.pattern.name}
@@ -52,7 +53,7 @@ function Available({
                             {
 
                                 n.pattern.requires.map(
-                                    p => (
+                                    (p : any) => (
                                         <span
                                             className="dep"
                                            key={p}

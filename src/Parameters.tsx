@@ -1,8 +1,11 @@
 
-import Available from './Available';
-import Selected from './Selected';
-
-function change(pattern, field, value, parameters, setParameters) {
+function change(
+    pattern : any,
+    field : any,
+    value : any,
+    parameters : any,
+    setParameters : any,
+) {
     const newParams = {
        ...parameters,
        [pattern]: {
@@ -13,10 +16,10 @@ function change(pattern, field, value, parameters, setParameters) {
     setParameters(newParams);
 }
 
-function Args({selection, parameters, setParameters}) {
+function Args({selection, parameters, setParameters} : any) {
 
     return selection.pattern.args.map(
-        field => 
+        (field : any) => 
             <div key={selection.pattern.name + "//" + field.name}>
                 <div>{field.description}</div>
                 <div>{selection.pattern.name}</div>
@@ -34,7 +37,7 @@ function Args({selection, parameters, setParameters}) {
 
 function ItemParameters({
     selection, configuration, parameters, setParameters,
-}) {
+} : any) {
 
     if (!selection) return;
 
@@ -50,7 +53,7 @@ function ItemParameters({
     let sparams = parameters[selection.pattern.name];
 
     selection.pattern.args.map(
-        field => {
+        (field : any) => {
             if (!(field.name in sparams))
                 sparams[field.name] = field.default;
         }
@@ -70,9 +73,9 @@ function ItemParameters({
 }
 
 function Parameters({
-    selection, select, patterns, configuration, deployment,
+    selection, configuration, deployment,
     parameters, setParameters,
-}) {
+} : any) {
 
     if (deployment)
         return (

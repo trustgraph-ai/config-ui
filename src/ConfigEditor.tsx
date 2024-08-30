@@ -5,10 +5,20 @@ import Plan from './Plan';
 import Catalog from './Catalog';
 import patterns from './patterns.json';
 import { generateDeployment } from './deployment';
+import {
+    Pattern, ParameterSettings, PatternParameters, Arg
+} from './Pattern';
 
-function dependenciesMet(pattern, features) {
+// Workaround to make isSubsetOf work
+declare global {
+    interface Set<T> {
+        isSubsetOf<T>(other: ReadonlySet<unknown>): boolean
+    }
+}
 
-    if (pattern.pattern.requires == []) return true;
+function dependenciesMet(pattern : Pattern, features : Set<string>) {
+
+    if (pattern.pattern.requires.length == 0) return true;
 
     if (new Set(pattern.pattern.requires).isSubsetOf(features))
         return true;
@@ -17,7 +27,9 @@ function dependenciesMet(pattern, features) {
 
 }
 
-function featuresMet(selected, patternMap) {
+function featuresMet(
+    selected : Pattern[],
+) {
     return new Set<string>(
         selected.flatMap(x => x.pattern.features)
     );
@@ -25,30 +37,32 @@ function featuresMet(selected, patternMap) {
 
 function ConfigEditor() {
 
-    const [configuration, setConfiguration] = useState([]);
-    const [selection, setSelection] = useState(null);
-    const [deployment, setDeployment] = useState(null);
-    const [parameters, setParameters] = useState({});
+    const [configuration, setConfiguration] = useState<Pattern[]>([]);
+    const [selection, setSelection] = useState<Pattern | null>(null);
+    const [deployment, setDeployment] = useState<string | null>(null);
+    const [parameters, setParameters] = useState<ParameterSettings>(
+        new Map()
+    );
 
     const patternMap = new Map<string, any>(
 	patterns.map(obj => [obj.pattern.name, obj])
     );
 
-    const configurationFeatures = featuresMet(configuration, patternMap);
+    const configurationFeatures = featuresMet(configuration);
 
     const available = patterns.filter(
-        x => dependenciesMet(x, configurationFeatures)
+        (x : any) => dependenciesMet(x, configurationFeatures)
     ).filter(
-	x => ! (new Set(configuration).has(x))
+	(x : any) => ! (new Set(configuration).has(x))
     );
 
     const unavailable = patterns.filter(
-        x => ! dependenciesMet(x, configurationFeatures)
+        (x : any) => ! dependenciesMet(x, configurationFeatures)
     ).filter(
-	x => ! (new Set(configuration).has(x))
+	(x : any) => ! (new Set(configuration).has(x))
     );
 
-    function select(pattern) {
+    function select(pattern : Pattern) {
         setSelection(pattern);
         setDeployment(null);
     }
@@ -64,33 +78,33 @@ function ConfigEditor() {
 
     }
 
-    function add(x) {
+    function add(x : string) {
 
         const pattern = patternMap.get(x);
         const name = pattern.pattern.name;
 
         if (!(name in parameters)) {
-            let sparams = {}
+            let sparams : PatternParameters = new Map();
             pattern.pattern.args.map(
-                field => {
+                (field : Arg) => {
                     if (field.default)
-                        sparams[field.name] = field.default;
+                        sparams.set(field.name, field.default);
                     else
-                        sparams[field.name] = "";
+                        sparams.set(field.name, "");
                 }
             );
-            parameters[name] = sparams;
+            parameters.set(name, sparams);
         }
 
         setConfiguration([...configuration, patternMap.get(x)]);
         setDeployment(null);
     }
 
-    function remove(x) {
+    function remove(x : Pattern) {
         let cfg = configuration.filter(y => !(y == x));
 
         while(true) {
-            let features = featuresMet(cfg, patternMap);
+            let features = featuresMet(cfg);
             let update = cfg.filter(
                 y => dependenciesMet(y, features)
             );
