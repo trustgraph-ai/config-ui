@@ -1,60 +1,26 @@
 
+export function toObject({patterns, configuration, parameters}) {
+
+    return configuration.map(
+        item => {
+            return {
+                name: item.pattern.name,
+                module: item.module,
+                parameters: parameters[item.pattern.name]
+            };
+        }
+    );
+
+}
+
+export function toJson({patterns, configuration, parameters}) {
+
+    const obj = toObject({patterns, configuration, parameters});
+    return JSON.stringify(obj, null, 4);
+
+}
+
 export function generateDeployment({patterns, configuration, parameters}) {
-
-    let depl = "";
-
-    for (let item of configuration) {
-
-        const name = item.pattern.name;
-        const import_name = name.replace(/-/g, "_");
-        const module = item.module;
-
-        depl += `local ${import_name} = import "${module}";`
-        depl += "\n";
-
-    }
-
-    depl += "\n"
-
-    let first = true;
-
-    for (let item of configuration) {
-
-        const name = item.pattern.name;
-        const import_name = name.replace(/-/g, "_");
-
-        if (first) {
-          depl += `${import_name}`;
-          first = false;
-        } else {
-          depl += " + \n";
-          depl += `  ${import_name}`;
-        }
-
-        if (name in parameters) {
-            Object.entries(parameters[name]).forEach(
-                ([p, v]) => {
-
-                    if (!v) return;
-                    if (v == "") return;
-
-                    if (typeof(v) == "string") {
-                        v = v.replace(/\n/g, "\\n");
-                        v = v.replace(/"/g, "\\\"");
-                    }
-
-                    v = JSON.stringify(v);
-
-                    depl += `\n    .with("${p}", ${v})`;
-
-                }
-            );
-        }
-    }
-
-    depl += "\n";
-
-    return depl;
-
+    return toJson({patterns, configuration, parameters});
 }
 
