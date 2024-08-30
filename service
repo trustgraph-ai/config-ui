@@ -5,6 +5,7 @@ from aiohttp import web
 import logging
 import os
 import json
+import yaml
 
 logger = logging.getLogger("service")
 logger.setLevel(logging.INFO)
@@ -55,7 +56,7 @@ class Api:
         else:
             self.config = {}
 
-        self.port = int(self.config.get("port", "8080"))
+        self.port = int(self.config.get("port", "8081"))
         self.app = web.Application(middlewares=[])
 
         self.app.add_routes([web.post("/api/generate", self.generate)])
@@ -102,6 +103,8 @@ class Api:
         print("Generate...")
         config = await request.text()
 
+        print(config)
+
         config = config.encode("utf-8")
 
         gen = Generator(config)
@@ -110,10 +113,8 @@ class Api:
             wrapper = f.read()
         processed = gen.process(wrapper)
 
-        print(processed)
-
         return web.Response(
-            text=json.dumps(processed), content_type = "text/plain"
+            text=yaml.dump(processed), content_type = "text/plain"
         )
 
     def run(self):
