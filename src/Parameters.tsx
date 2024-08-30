@@ -78,7 +78,7 @@ function Parameters({
         return (
             <div className="card item-editor">
                 <h2>Deployment configuration</h2>
-                <pre>{deployment}</pre>
+                <textarea>{deployment}</textarea>
             </div>
         );
 

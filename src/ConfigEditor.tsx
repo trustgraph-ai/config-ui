@@ -4,6 +4,7 @@ import './ConfigEditor.scss';
 import Plan from './Plan';
 import Catalog from './Catalog';
 import patterns from './patterns.json';
+import { generateDeployment } from './deployment';
 
 function dependenciesMet(pattern, features) {
 
@@ -53,7 +54,14 @@ function ConfigEditor() {
     }
 
     function deploy() {
-        setDeployment("Launch");
+
+        const depl = generateDeployment({
+            patterns, configuration, parameters
+        });
+
+        setDeployment(depl);
+        setSelection(null);
+
     }
 
     function add(x) {
