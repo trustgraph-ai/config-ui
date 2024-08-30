@@ -61,7 +61,24 @@ const App: React.FC = () => {
                     "chunk-overlap": chunkOverlap,
                 }
             });
-        };
+        } else {
+            config.push({
+                "name": "null",
+                "parameters": {
+                    "chunk-size": chunkSize,
+                    "chunk-overlap": chunkOverlap,
+                }
+            });
+        }
+
+        config.push({
+            name: "null",
+            parameters: {
+                [modelDeployment + "-temperature"]: temperature,
+                [modelDeployment + "-max-output-tokens"]: maxOutputTokens,
+                [modelDeployment + "-model"]: modelName,
+            }
+        });
 
         const cnf = JSON.stringify(config, null, 4)
       
@@ -123,7 +140,7 @@ const App: React.FC = () => {
       </Box>
 
       <Box my={4}>
-      <Button variant="contained" onClick={() => deploy()}>Contained</Button>
+      <Button variant="contained" onClick={() => deploy()}>Generate</Button>
       </Box>
 
       <Box my={4}>
