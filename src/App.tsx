@@ -1,12 +1,12 @@
 
 import './App.scss';
-import ConfigEditor from './ConfigEditor';
+import SimpleEditor from './simple-editor/SimpleEditor';
 
 function App() {
 
     return (
         <>
-            <ConfigEditor/>
+        <    SimpleEditor/>
         </>
     );
 
