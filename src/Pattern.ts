@@ -26,6 +26,3 @@ export interface Pattern {
     module : string;
 };
 
-export type PatternParameters = Map<string,string>;
-
-export type ParameterSettings = Map<string, PatternParameters>;

@@ -11,8 +11,9 @@ logger.setLevel(logging.INFO)
 
 class Generator:
 
-    def __init__(self, base="../pulsar3/templates/"):
+    def __init__(self, config, base="../pulsar3/templates/"):
         self.jsonnet_base = base
+        self.config = config
 
     def process(self, config):
 
@@ -21,7 +22,12 @@ class Generator:
 
     def load(self, dir, filename):
 
-        logger.debug("Request jsonnet: %s %s", dir, filename)
+        logger.info("Request jsonnet: %s %s", dir, filename)
+
+        if filename == "config.json" and dir == "":
+            print("config.json...")
+            path = os.path.join(".", dir, filename)
+            return str(path), self.config
 
         try:
             if dir:
@@ -50,7 +56,6 @@ class Api:
             self.config = {}
 
         self.port = int(self.config.get("port", "8080"))
-        self.gen = Generator()
         self.app = web.Application(middlewares=[])
 
         self.app.add_routes([web.post("/api/generate", self.generate)])
@@ -97,12 +102,18 @@ class Api:
         print("Generate...")
         config = await request.text()
 
-        next = self.gen.process(config)
+        config = config.encode("utf-8")
 
-        print(next)
+        gen = Generator(config)
+
+        with open("../pulsar3/templates/config-loader.jsonnet", "r") as f:
+            wrapper = f.read()
+        processed = gen.process(wrapper)
+
+        print(processed)
 
         return web.Response(
-            text=json.dumps(next), content_type = "text/plain"
+            text=json.dumps(processed), content_type = "text/plain"
         )
 
     def run(self):

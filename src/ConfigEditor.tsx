@@ -5,9 +5,7 @@ import Plan from './Plan';
 import Catalog from './Catalog';
 import patterns from './patterns.json';
 import { generateDeployment } from './deployment';
-import {
-    Pattern, ParameterSettings, PatternParameters, Arg
-} from './Pattern';
+import { Pattern, Arg } from './Pattern';
 
 // Workaround to make isSubsetOf work
 declare global {
@@ -40,9 +38,7 @@ function ConfigEditor() {
     const [configuration, setConfiguration] = useState<Pattern[]>([]);
     const [selection, setSelection] = useState<Pattern | null>(null);
     const [deployment, setDeployment] = useState<string | null>(null);
-    const [parameters, setParameters] = useState<ParameterSettings>(
-        new Map()
-    );
+    const [parameters, setParameters] = useState<any>({});
 
     const patternMap = new Map<string, any>(
 	patterns.map(obj => [obj.pattern.name, obj])
@@ -69,12 +65,16 @@ function ConfigEditor() {
 
     function deploy() {
 
-        const depl = generateDeployment({
+        generateDeployment({
             patterns, configuration, parameters
-        });
-
-        setDeployment(depl);
-        setSelection(null);
+        }).then(
+            (depl : string) => {
+                setDeployment(depl);
+                setSelection(null);
+            }
+        ).catch(
+            (err : any) => console.log("Error:", err)
+        );
 
     }
 
@@ -82,20 +82,20 @@ function ConfigEditor() {
 
         const pattern = patternMap.get(x);
         const name = pattern.pattern.name;
-
         if (!(name in parameters)) {
-            let sparams : PatternParameters = new Map();
+            let sparams : any = {};
             pattern.pattern.args.map(
                 (field : Arg) => {
                     if (field.default)
-                        sparams.set(field.name, field.default);
+                        sparams[field.name] = field.default;
                     else
-                        sparams.set(field.name, "");
+                        sparams[field.name] = "";
                 }
             );
-            parameters.set(name, sparams);
+            parameters[name] = sparams;
         }
 
+        setParameters(parameters);
         setConfiguration([...configuration, patternMap.get(x)]);
         setDeployment(null);
     }

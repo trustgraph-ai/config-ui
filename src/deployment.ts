@@ -16,6 +16,8 @@ export function toObject({configuration, parameters} : any) {
 export function toJson({patterns, configuration, parameters} : any) {
 
     const obj = toObject({patterns, configuration, parameters});
+    console.log("OBJ:", obj);
+
     return JSON.stringify(obj, null, 4);
 
 }
@@ -23,6 +25,18 @@ export function toJson({patterns, configuration, parameters} : any) {
 export function generateDeployment({
     patterns, configuration, parameters
 } : any) {
-    return toJson({patterns, configuration, parameters});
+
+    let config = toJson({patterns, configuration, parameters});
+
+    return fetch(
+        "/api/generate", {
+            body: config,
+            method: "POST",
+            headers: {
+            }
+        }
+    ).then(
+        x => x.text()
+    );
 }
 
