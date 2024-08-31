@@ -7,14 +7,10 @@ import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import Avatar from '@mui/material/Avatar';
-import IconButton, { IconButtonProps } from '@mui/material/IconButton';
-import Icon from '@mui/material/Icon';
-import { red } from '@mui/material/colors';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+// import { red } from '@mui/material/colors';
 
 import { Pattern } from './Pattern';
-import { icons } from './icons';
+import { getIcon } from './icons';
 
 interface AvailablePatternProps {
     pattern : Pattern;
@@ -30,7 +26,7 @@ const AvailablePattern : React.FC<AvailablePatternProps> =
 
     <Card variant="outlined" sx={{ minWidth: 275, maxWidth: 350 }}>
       <CardHeader
-        avatar={icons[pattern.pattern.category[0]]}
+        avatar={getIcon(pattern.pattern.category[0])}
         title={pattern.pattern.title}
         subheader={pattern.pattern.category[0] + " pattern"}
       />

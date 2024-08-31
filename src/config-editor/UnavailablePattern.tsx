@@ -3,15 +3,13 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { Error } from '@mui/icons-material';
 
 import { Pattern } from './Pattern';
-import { icons } from './icons';
+import { getIcon } from './icons';
 
 interface UnavailablePatternProps {
     pattern : Pattern;
@@ -27,7 +25,7 @@ const UnavailablePattern : React.FC<UnavailablePatternProps> =
 
         <Card variant="outlined" sx={{ minWidth: 275, maxWidth: 350 }}>
           <CardHeader
-            avatar={icons[pattern.pattern.category[0]]}
+            avatar={getIcon(pattern.pattern.category[0])}
             title={pattern.pattern.title}
             subheader={pattern.pattern.category[0] + " pattern"}
           />
