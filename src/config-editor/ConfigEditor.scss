@@ -13,7 +13,7 @@
     flex-wrap: nowrap;
     justify-content: space-evenly;
     margin: auto;
-    width: 90%;
+    width: 90vw;
 
     .plan {
 
@@ -80,12 +80,22 @@
     .catalog {
 
 	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
+	flex-direction: column;
+	flex-wrap: column;
 	row-gap: 0.5rem;
 	column-gap: 0.5rem;
 
+        .catalog-section {
 
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: start;
+            margin: auto;
+            
+        }
+
+/*
         .catalog-item {
 
             display: grid;
@@ -133,7 +143,7 @@
                 }
             }
         }
-
+*/
     }
 
 }
