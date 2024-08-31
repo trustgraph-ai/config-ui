@@ -17,7 +17,7 @@
       }
    },
    {
-      "module": "components/pulsar.jsonnet",
+      "module": "components/pulsar-manager.jsonnet",
       "pattern": {
          "args": [
             {

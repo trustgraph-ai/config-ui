@@ -11,22 +11,39 @@ interface CatalogProps {
     patterns : Pattern[]
 }
 
+const categories : { id : string; name : string } = [
+    { id: "foundation", name: "Foundation" },
+    { id: "llm", name: "LLM" },
+    { id: "knowledge-graph", name: "Knowledge graph" },
+    { id: "prompting", name: "Prompting" },
+    { id: "chunking", name: "Chunking" },
+    { id: "monitoring", name: "Monitoring" },
+    { id: "vector-store", name: "Vector store" },
+];
+
 const Catalog : React.FC<CatalogProps> =
     ({ available, unavailable, add, patterns}) =>
 {
 
-    let featureMap = new Map<string, string>();
+    if (available.length == 0 && unavailable.length == 0) return null;
 
-    patterns.map(
-        (p) =>
-            p.pattern.features.map(
-                (f) => {
-                    featureMap.set(f, p.pattern.title);
-                }
-            )
+    let catalog = categories.map(
+        cat => {
+            return {
+                name: cat.name,
+                patterns: available.filter(
+                    pat => pat.pattern.category.includes(cat.id)
+                )
+            }
+        }
+    ).filter(
+        cat => cat.patterns.length > 0
     );
 
-    if (available.length == 0 && unavailable.length == 0) return null;
+    catalog.push({
+        name: "Unavailable",
+        patterns: unavailable,
+    });
 
     return (
         <div className="card">
