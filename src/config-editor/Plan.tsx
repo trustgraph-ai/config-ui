@@ -33,7 +33,6 @@ const Plan : React.FC<PlanProps> =
             />
 
             <Parameters
-                configuration={configuration}
                 selection={selection}
                 deployment={deployment}
                 parameters={parameters}

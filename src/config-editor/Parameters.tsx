@@ -6,14 +6,13 @@ import { Pattern, ParameterSet } from './Pattern';
 
 interface ParametersProps {
     selection : Pattern | null;
-    configuration : Pattern[];
     deployment : string | null;
     parameters : ParameterSet;
     setParameters : (value : ParameterSet) => void;
 };
 
 const Parameters : React.FC<ParametersProps> =
-    ({ selection, configuration, deployment, parameters, setParameters }) =>
+    ({ selection, deployment, parameters, setParameters }) =>
 {    
 
     if (deployment)
@@ -32,7 +31,6 @@ const Parameters : React.FC<ParametersProps> =
 
         <ItemParameters
             selection={selection}
-            configuration={configuration}
             parameters={parameters}
             setParameters={setParameters}
         />
