@@ -17,9 +17,6 @@ const Args : React.FC<ArgsProps> =
     return selection.pattern.args.map(
         (field) => 
             <div key={selection.pattern.name + "//" + field.name}>
-                <div>{field.description}</div>
-                <div>{selection.pattern.name}</div>
-                <div>{field.name}</div>
                 <div>
                     <textarea
                         defaultValue={parameters.get(selection.pattern.name)!.get(field.name)}
