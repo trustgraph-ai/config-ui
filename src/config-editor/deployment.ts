@@ -36,10 +36,23 @@ export function toJson(
 
 export function generateDeployment(
     configuration : Pattern[],
-    parameters : ParameterSet
-) {
+    parameters : ParameterSet,
+    kind : string,
+) : Promise <string> {
+
+    if (kind == "k8s") {
+        return new Promise((_resolve, reject) => {
+            reject("Not implemented.");
+        });
+    }
 
     let config = toJson(configuration, parameters);
+
+    if (kind == "json") {
+        return new Promise((resolve, _reject) => {
+            resolve(config);
+        });
+    }
 
     return fetch(
         "/api/generate", {

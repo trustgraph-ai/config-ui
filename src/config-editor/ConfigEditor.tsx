@@ -1,6 +1,9 @@
 
 import { useState } from 'react';
 
+import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
+import Button from '@mui/material/Button';
+
 import './ConfigEditor.scss';
 import Plan from './Plan';
 import Catalog from './Catalog';
@@ -42,6 +45,7 @@ function ConfigEditor() {
     const [selection, setSelection] = useState<Pattern | null>(null);
     const [deployment, setDeployment] = useState<string | null>(null);
     const [parameters, setParameters] = useState<ParameterSet>(new Map());
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const patternMap : Map<string, Pattern> = new Map(
 	patterns.map(obj => [obj.pattern.name, obj])
@@ -66,20 +70,35 @@ function ConfigEditor() {
         setDeployment(null);
     }
 
-    function deploy() {
+    function deploy(kind : string) {
 
         generateDeployment(
-            configuration, parameters
+            configuration, parameters, kind
         ).then(
             (depl : string) => {
                 setDeployment(depl);
                 setSelection(null);
             }
         ).catch(
-            (err) => console.log("Error:", err)
+            (err) => {
+                console.log("Error:", err);
+                handleError(err);
+            }
         );
 
     }
+
+    function handleError(error : string) {
+        setErrorMessage(error);
+    }
+
+    function closeError(
+        _event: Event | React.SyntheticEvent<Element, Event>,
+        reason : SnackbarCloseReason
+    ) {
+        if (reason === "clickaway") return;
+        setErrorMessage(null);
+    }    
 
     function add(x : string) {
 
@@ -157,6 +176,24 @@ function ConfigEditor() {
                 />
 
             </div>
+
+      <Snackbar
+        open={errorMessage != null}
+        autoHideDuration={6000}
+        onClose={closeError}
+        message={errorMessage}
+        action={
+            <>
+                <Button
+                    size="small"
+                    onClick={() => setErrorMessage(null)}
+                >
+                    Close
+                </Button>
+            </>
+        }
+      />            
+
         </>
   )
 }

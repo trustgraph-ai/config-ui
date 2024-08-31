@@ -9,7 +9,7 @@ interface PlanProps {
     selection : Pattern | null;
     select : (value : Pattern) => void;
     patterns : Pattern[]
-    deploy : () => void;
+    deploy : (kind : string) => void;
     deployment : string | null;
     parameters : ParameterSet;
     setParameters : (value : ParameterSet) => void;

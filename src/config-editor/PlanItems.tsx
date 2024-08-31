@@ -2,17 +2,17 @@
 import React from 'react';
 
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
 
 import { Pattern } from './Pattern';
 import PlanItem from './PlanItem';
+import DeployButtons from './DeployButtons';
 
 interface PlanItemsProps {
     configuration : Pattern[];
     remove : (value : Pattern) => void;
     select : (value : Pattern) => void;
     selection : Pattern | null;
-    deploy : () => void;
+    deploy : (value : string) => void;
     patterns : Pattern[];
 }
 
@@ -43,7 +43,7 @@ const PlanItems : React.FC<PlanItemsProps> =
 
             <h2>Your configuration patterns</h2>
 
-            <Stack>
+            <Stack spacing={1}>
                 {
                     configuration.map((p) => (
                         <PlanItem
@@ -55,11 +55,12 @@ const PlanItems : React.FC<PlanItemsProps> =
                         />
                     ))
                 }
-           </Stack>
 
-           <Button variant="outlined" size="small" onClick={() => deploy()}>
-               Create deployment configuration
-           </Button>
+               <Stack direction="row" spacing={2}>
+                   <DeployButtons deploy={deploy}/>
+               </Stack>
+
+           </Stack>
 
         </div>
     );
