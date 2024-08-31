@@ -68,9 +68,9 @@ function ConfigEditor() {
 
     function deploy() {
 
-        generateDeployment({
+        generateDeployment(
             patterns, configuration, parameters
-        }).then(
+        ).then(
             (depl : string) => {
                 setDeployment(depl);
                 setSelection(null);

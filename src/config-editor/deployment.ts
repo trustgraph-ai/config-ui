@@ -1,32 +1,47 @@
 
-export function toObject({configuration, parameters} : any) {
+import { Patterns, ParameterSet } from './Pattern';
+
+export function toObject(
+    configuration : Pattern[],
+    parameters : ParameterSet
+) {
 
     return configuration.map(
-        (item : any) => {
+        (item) => {
+
+            const params = Object.fromEntries(
+                parameters.get(item.pattern.name)!
+            );
+
             return {
                 name: item.pattern.name,
                 module: item.module,
-                parameters: parameters[item.pattern.name]
+                parameters: params,
             };
+
         }
     );
 
 }
 
-export function toJson({patterns, configuration, parameters} : any) {
+export function toJson(
+    patterns : Pattern[],
+    configuration : Pattern[],
+    parameters : ParameterSet
+) {
 
-    const obj = toObject({patterns, configuration, parameters});
-    console.log("OBJ:", obj);
-
+    const obj = toObject(configuration, parameters);
     return JSON.stringify(obj, null, 4);
 
 }
 
-export function generateDeployment({
-    patterns, configuration, parameters
-} : any) {
+export function generateDeployment(
+    patterns : Pattern[],
+    configuration : Pattern[],
+    parameters : ParameterSet
+) {
 
-    let config = toJson({patterns, configuration, parameters});
+    let config = toJson(patterns, configuration, parameters);
 
     return fetch(
         "/api/generate", {
@@ -38,5 +53,6 @@ export function generateDeployment({
     ).then(
         x => x.text()
     );
+    
 }
 
