@@ -1,7 +1,10 @@
 
 import React from 'react';
 
+import Stack from '@mui/material/Stack';
+
 import { Pattern } from './Pattern';
+import PlanItem from './PlanItem';
 
 interface PlanItemsProps {
     configuration : Pattern[];
@@ -40,21 +43,14 @@ const PlanItems : React.FC<PlanItemsProps> =
             <h2>Your configuration patterns</h2>
 
                 {
-                    configuration.map((n : Pattern) => (
-                        <div key={n.pattern.name}
-                            className={(n == selection) ? "plan-item selection" : "plan-item"}
-                            >
-                            <div>{n.pattern.icon} {n.pattern.title}</div>
-                            <div>
-                                <button onClick={() => select(n)}>
-                                    parameters
-                                </button>
-                                <button onClick={() => remove(n)}>
-                                    remove
-                                </button>
-                            </div>
-                            <div></div>
-                        </div>
+                    configuration.map((p) => (
+                        <PlanItem
+                            key={p.pattern.name}
+                            pattern={p}
+                            select={select}
+                            remove={remove}
+                            selection={selection}
+                        />
                     ))
                 }
 
