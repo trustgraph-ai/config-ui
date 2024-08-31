@@ -1,6 +1,8 @@
-
 import React from 'react';
+
 import { Pattern } from './Pattern';
+import AvailablePattern from './AvailablePattern';
+import UnavailablePattern from './UnavailablePattern';
 
 interface CatalogProps {
     available : Pattern[],
@@ -34,54 +36,25 @@ const Catalog : React.FC<CatalogProps> =
             <div className="catalog">
 
                 {
-                    available.map((n) => (
-                        <div
-                            className="catalog-item available"
-                            key={n.pattern.name}
-                        >
-                            <div className="title">{n.pattern.icon} {n.pattern.title}</div>
-                            <div className="description">{n.pattern.description}</div>
-                            <div className="additional">
-				<button onClick={() => add(n.pattern.name)}>
-				    add
-				</button>
-			    </div>
-			    <div></div>
-                        </div>
+                    available.map((p) => (
+                        <AvailablePattern
+                            key={p.pattern.name}
+                            pattern={p}
+                            add={add}
+                        />
                     ))
                 }
 
                 {
-                    unavailable.map((n) => (
-                        <div
-                            className="catalog-item unavailable"
-                            key={n.pattern.name}
-                        >
-                            <div className="title">{n.pattern.icon} {n.pattern.title}</div>
-                            <div className="description">{n.pattern.description}</div>
-                            <div className="additional">
-                            {
-
-                                n.pattern.requires.map(
-                                    (p) => (
-                                        <span
-                                            className="dep"
-                                           key={p}
-                                        >
-                                            needs {p}
-                                        </span>
-                                    )
-                                )
-
-
-                            }
-                            </div>
-                        </div>
+                    unavailable.map((p) => (
+                        <UnavailablePattern
+                            key={p.pattern.name}
+                            pattern={p}
+                        />
                     ))
                 }
 
             </div>
-
 
         </div>
     );
