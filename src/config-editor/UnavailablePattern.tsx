@@ -41,6 +41,7 @@ const UnavailablePattern : React.FC<UnavailablePatternProps> =
                     (p) => (
                         <Chip
                             key={p}
+                            variant="outlined"
                             avatar={<Error fontSize="small"/>}
 
                             label={"needs " + p}
