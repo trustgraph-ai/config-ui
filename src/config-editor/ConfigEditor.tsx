@@ -1,11 +1,17 @@
 
 import { useState } from 'react';
+
+import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
+import Button from '@mui/material/Button';
+
 import './ConfigEditor.scss';
 import Plan from './Plan';
 import Catalog from './Catalog';
-import patterns from './patterns.json';
+import { Pattern, Arg, ParameterSet, PatternParameters } from './Pattern';
 import { generateDeployment } from './deployment';
-import { Pattern, Arg } from './Pattern';
+import patternsUntyped from './patterns.json';
+
+const patterns = (patternsUntyped as Pattern[]);
 
 // Workaround to make isSubsetOf work
 declare global {
@@ -38,24 +44,25 @@ function ConfigEditor() {
     const [configuration, setConfiguration] = useState<Pattern[]>([]);
     const [selection, setSelection] = useState<Pattern | null>(null);
     const [deployment, setDeployment] = useState<string | null>(null);
-    const [parameters, setParameters] = useState<any>({});
+    const [parameters, setParameters] = useState<ParameterSet>(new Map());
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const patternMap = new Map<string, any>(
+    const patternMap : Map<string, Pattern> = new Map(
 	patterns.map(obj => [obj.pattern.name, obj])
     );
 
     const configurationFeatures = featuresMet(configuration);
 
     const available = patterns.filter(
-        (x : any) => dependenciesMet(x, configurationFeatures)
+        (x) => dependenciesMet(x, configurationFeatures)
     ).filter(
-	(x : any) => ! (new Set(configuration).has(x))
+	(x) => ! (new Set(configuration).has(x))
     );
 
     const unavailable = patterns.filter(
-        (x : any) => ! dependenciesMet(x, configurationFeatures)
+        (x) => ! dependenciesMet(x, configurationFeatures)
     ).filter(
-	(x : any) => ! (new Set(configuration).has(x))
+	(x) => ! (new Set(configuration).has(x))
     );
 
     function select(pattern : Pattern) {
@@ -63,40 +70,66 @@ function ConfigEditor() {
         setDeployment(null);
     }
 
-    function deploy() {
+    function deploy(kind : string) {
 
-        generateDeployment({
-            patterns, configuration, parameters
-        }).then(
+        generateDeployment(
+            configuration, parameters, kind
+        ).then(
             (depl : string) => {
                 setDeployment(depl);
                 setSelection(null);
             }
         ).catch(
-            (err : any) => console.log("Error:", err)
+            (err) => {
+                console.log("Error:", err);
+                handleError(err);
+            }
         );
 
     }
 
+    function handleError(error : string) {
+        setErrorMessage(error);
+    }
+
+    function closeError(
+        _event: Event | React.SyntheticEvent<Element, Event>,
+        reason : SnackbarCloseReason
+    ) {
+        if (reason === "clickaway") return;
+        setErrorMessage(null);
+    }    
+
     function add(x : string) {
 
         const pattern = patternMap.get(x);
+
+        if (!pattern) {
+            console.log("Unknown pattern", x);
+            return;
+        }
+
         const name = pattern.pattern.name;
+
         if (!(name in parameters)) {
-            let sparams : any = {};
+
+            let pparams : PatternParameters = new Map();
+
             pattern.pattern.args.map(
                 (field : Arg) => {
                     if (field.default)
-                        sparams[field.name] = field.default;
+                        pparams.set(field.name, field.default);
                     else
-                        sparams[field.name] = "";
+                        pparams.set(field.name, "");
                 }
             );
-            parameters[name] = sparams;
+
+            parameters.set(name, pparams);
+
         }
 
         setParameters(parameters);
-        setConfiguration([...configuration, patternMap.get(x)]);
+        setConfiguration([...configuration, pattern]);
         setDeployment(null);
     }
 
@@ -125,9 +158,7 @@ function ConfigEditor() {
                 <h1>Config editor</h1>
 
                 <Plan
-                    available={available} unavailable={unavailable}
                     configuration={configuration}
-                    add={add}
                     remove={remove}
                     selection={selection}
                     select={select}
@@ -142,12 +173,27 @@ function ConfigEditor() {
                     available={available}
                     unavailable={unavailable}
                     add={add}
-                    select={select}
-                    selection={selection}
-                    patterns={patterns}
                 />
 
             </div>
+
+      <Snackbar
+        open={errorMessage != null}
+        autoHideDuration={6000}
+        onClose={closeError}
+        message={errorMessage}
+        action={
+            <>
+                <Button
+                    size="small"
+                    onClick={() => setErrorMessage(null)}
+                >
+                    Close
+                </Button>
+            </>
+        }
+      />            
+
         </>
   )
 }

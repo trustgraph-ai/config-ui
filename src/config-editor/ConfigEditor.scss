@@ -13,7 +13,7 @@
     flex-wrap: nowrap;
     justify-content: space-evenly;
     margin: auto;
-    width: 90%;
+    width: 90vw;
 
     .plan {
 
@@ -80,58 +80,19 @@
     .catalog {
 
 	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
+	flex-direction: column;
+	flex-wrap: column;
 	row-gap: 0.5rem;
 	column-gap: 0.5rem;
 
+        .catalog-section {
 
-        .catalog-item {
-
-            display: grid;
-            border: 1px solid black;
-	    width: 23rem;
-	    border-radius: 8px;
-            padding: 0.8rem;
-            grid-column-gap: 0.5rem;
-            grid-row-gap: 0.5rem;
-            align-items: start;
-            justify-items: start;
-
-	    &.unavailable {
-
-                border: 1px solid #a0a0a0;
-
-                > div {
-		    color: #808080;
-                }
-
-	    }
-
-            .title {
-                font-weight: bold;
-            }
-
-            .description {
-                font-size: small;
-                font-weight: 400;
-            }
-
-            .additional {
-
-                & > span.dep {
-                    color: white;
-                    font-size: small;
-                    font-weight: bold;
-                    white-space: nowrap;
-                    display: block-inline;
-                    background-color: #808080;
-                    padding: 0.4rem;
-                    margin: 0.2rem;
-                    border-radius: 8px;
-
-                }
-            }
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: start;
+            margin: auto;
+            
         }
 
     }

@@ -1,6 +1,6 @@
 
 import './App.scss';
-import ConfigEditor from './ConfigEditor';
+import ConfigEditor from './config-editor/ConfigEditor';
 
 function App() {
 
