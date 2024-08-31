@@ -1,6 +1,7 @@
 import React from 'react';
 
 import CatalogSection from './CatalogSection';
+import { Pattern } from './Pattern';
 
 interface CatalogContentProps {
     catalog : { id : string, name : string, patterns : Pattern[] }[];

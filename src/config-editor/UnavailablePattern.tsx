@@ -9,7 +9,6 @@ import Typography from '@mui/material/Typography';
 import { Warning, Error } from '@mui/icons-material';
 
 import { Pattern } from './Pattern';
-import { getIcon } from './icons';
 
 interface UnavailablePatternProps {
     pattern : Pattern;

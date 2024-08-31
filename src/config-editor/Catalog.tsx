@@ -1,11 +1,9 @@
 import React from 'react';
 
 import { Pattern } from './Pattern';
-import AvailablePattern from './AvailablePattern';
-import UnavailablePattern from './UnavailablePattern';
 import CatalogContent from './CatalogContent';
 
-const categories : { id : string; name : string } = [
+const categories : { id : string; name : string }[] = [
     { id: "foundation", name: "Foundation" },
     { id: "llm", name: "LLM" },
     { id: "knowledge-graph", name: "Knowledge graph" },
@@ -19,11 +17,10 @@ interface CatalogProps {
     available : Pattern[],
     unavailable : Pattern[],
     add : (value : string) => void;
-    patterns : Pattern[]
 }
 
 const Catalog : React.FC<CatalogProps> =
-    ({ available, unavailable, add, patterns}) =>
+    ({ available, unavailable, add }) =>
 {
 
     if (available.length == 0 && unavailable.length == 0) return null;

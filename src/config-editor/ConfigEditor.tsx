@@ -154,7 +154,6 @@ function ConfigEditor() {
                     available={available}
                     unavailable={unavailable}
                     add={add}
-                    patterns={patterns}
                 />
 
             </div>
