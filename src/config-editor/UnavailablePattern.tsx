@@ -6,7 +6,7 @@ import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import { Error } from '@mui/icons-material';
+import { Warning, Error } from '@mui/icons-material';
 
 import { Pattern } from './Pattern';
 import { getIcon } from './icons';
@@ -25,7 +25,7 @@ const UnavailablePattern : React.FC<UnavailablePatternProps> =
 
         <Card variant="outlined" sx={{ minWidth: 275, maxWidth: 350 }}>
           <CardHeader
-            avatar={getIcon(pattern.pattern.category[0])}
+            avatar={<Warning/>}
             title={pattern.pattern.title}
             subheader={pattern.pattern.category[0] + " pattern"}
           />
@@ -37,11 +37,10 @@ const UnavailablePattern : React.FC<UnavailablePatternProps> =
             {
                 meta.requires.map(
                     (p) => (
-                        <Chip
+                        <Chip color="warning"
                             key={p}
-                            variant="outlined"
-                            avatar={<Error fontSize="small"/>}
-
+                            variant="filled"
+                            avatar={<Error fontSize="large"/>}
                             label={"needs " + p}
                             sx={{mr: 1}}
                         />

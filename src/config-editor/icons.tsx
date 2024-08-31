@@ -12,13 +12,13 @@ import {
 const fontSize = "large";
 
 export const icons : { [key : string] : JSX.Element } = {
-    "llm": <Psychology fontSize={fontSize}/>,
-    "foundation": <Engineering fontSize={fontSize}/>,
-    "knowledge-graph": <Hub fontSize={fontSize}/>,
-    "prompting": <ChatBubble fontSize={fontSize}/>,
-    "chunking": <VerticalSplit fontSize={fontSize}/>,
-    "monitoring": <MonitorHeart fontSize={fontSize}/>,
-    "vector-store": <Polyline fontSize={fontSize}/>,
+    "llm": <Psychology color="primary" fontSize={fontSize}/>,
+    "foundation": <Engineering color="primary"  fontSize={fontSize}/>,
+    "knowledge-graph": <Hub color="primary"  fontSize={fontSize}/>,
+    "prompting": <ChatBubble color="primary"  fontSize={fontSize}/>,
+    "chunking": <VerticalSplit color="primary"  fontSize={fontSize}/>,
+    "monitoring": <MonitorHeart color="primary"  fontSize={fontSize}/>,
+    "vector-store": <Polyline color="primary"  fontSize={fontSize}/>,
 };
 
 export const getIcon = (icon : string) : JSX.Element => {
