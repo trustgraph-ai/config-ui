@@ -1,5 +1,12 @@
 import React from 'react';
 
+import Accordion from '@mui/material/Accordion';
+import AccordionActions from '@mui/material/AccordionActions';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Button from '@mui/material/Button';
+
 import { Pattern } from './Pattern';
 import AvailablePattern from './AvailablePattern';
 import UnavailablePattern from './UnavailablePattern';
@@ -30,6 +37,7 @@ const Catalog : React.FC<CatalogProps> =
     let catalog = categories.map(
         cat => {
             return {
+                id: cat.id,
                 name: cat.name,
                 patterns: available.filter(
                     pat => pat.pattern.category.includes(cat.id)
@@ -40,40 +48,52 @@ const Catalog : React.FC<CatalogProps> =
         cat => cat.patterns.length > 0
     );
 
+/*
     catalog.push({
         name: "Unavailable",
         patterns: unavailable,
     });
+    */
 
     return (
         <div className="card">
 
             <h2>Configuration pattern catalog</h2>
 
-            <div className="catalog">
+        <div className="catalog">
 
-                {
-                    available.map((p) => (
-                        <AvailablePattern
-                            key={p.pattern.name}
-                            pattern={p}
-                            add={add}
-                        />
-                    ))
-                }
+            {
+                catalog.map(
+                    cat => {
+                        return (
+                             <Accordion key={cat.id}>
+                                 <AccordionSummary
+                                     expandIcon={<ExpandMoreIcon/>}
+                                     id={cat.id}>
+                                         {cat.name}
+                                 </AccordionSummary>
+                                 <AccordionDetails>
+                                 {
+                                     cat.patterns.map(
+                                         pat => (
+                                         <AvailablePattern
+                                             key={cat.patterns.name}
+                                             pattern={pat}
+                                             add={add}/>
+                                          )
+                                     )
+                                 }
+                                 </AccordionDetails>
+                             </Accordion>
+                         )
+                    }
+                )
+        }
 
-                {
-                    unavailable.map((p) => (
-                        <UnavailablePattern
-                            key={p.pattern.name}
-                            pattern={p}
-                        />
-                    ))
-                }
+    </div>
 
-            </div>
+</div>
 
-        </div>
     );
 
 }
