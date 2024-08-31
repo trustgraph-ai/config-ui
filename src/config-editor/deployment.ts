@@ -1,5 +1,5 @@
 
-import { Patterns, ParameterSet } from './Pattern';
+import { Pattern, ParameterSet } from './Pattern';
 
 export function toObject(
     configuration : Pattern[],
@@ -25,7 +25,6 @@ export function toObject(
 }
 
 export function toJson(
-    patterns : Pattern[],
     configuration : Pattern[],
     parameters : ParameterSet
 ) {
@@ -36,12 +35,11 @@ export function toJson(
 }
 
 export function generateDeployment(
-    patterns : Pattern[],
     configuration : Pattern[],
     parameters : ParameterSet
 ) {
 
-    let config = toJson(patterns, configuration, parameters);
+    let config = toJson(configuration, parameters);
 
     return fetch(
         "/api/generate", {
