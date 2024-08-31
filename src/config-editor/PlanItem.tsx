@@ -3,8 +3,12 @@ import React from 'react';
 
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardHeader from '@mui/material/CardHeader';
+import { Delete, Settings } from '@mui/icons-material';
 
 import { Pattern } from './Pattern';
 import { getIcon } from './icons';
@@ -23,29 +27,24 @@ const PlanItem : React.FC<PlanItemProps> =
     const meta = pattern.pattern;
 
     return (
-        <Paper
-            sx={{ p: 1, alignItems: 'flex-center' }}
-            className={(pattern == selection) ? "selected" : ""}
-            >
-            <Stack direction="row" spacing={2}>
-                <Box sx={{ minWidth: 50, maxWidth: 50 }}>
-                    {getIcon(meta.category[0])}
-                </Box>
-                <Box sx={{ minWidth: 375, maxWidth: 400 }}>
-                    <div>{meta.title}</div>
-                </Box>
-                <Box>
-                    <Button onClick={() => select(pattern)}>
-                        parameters
-                    </Button>
-                </Box>
-                <Box>
-                    <Button onClick={() => remove(pattern)}>
-                        remove
-                    </Button>
-                </Box>
-            </Stack>
-        </Paper>
+        <Card>
+            <CardHeader
+                avatar={getIcon(meta.category[0])}
+                title={meta.title}
+                action={
+                <>
+                <IconButton color="primary" size="small"
+                    onClick={() => select(pattern)}>
+                    <Settings/>
+                </IconButton>
+                <IconButton color="warning" size="small"
+                    onClick={() => remove(pattern)}>
+                    <Delete/>
+                </IconButton>
+                </>
+                }
+               />
+        </Card>
     );
 
 }

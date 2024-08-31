@@ -42,7 +42,7 @@ const PlanItems : React.FC<PlanItemsProps> =
 
             <h2>Your configuration patterns</h2>
 
-                <Stack spacing={2}>
+<Stack>
                 {
                     configuration.map((p) => (
                         <PlanItem

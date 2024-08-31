@@ -36,7 +36,7 @@ const AvailablePattern : React.FC<AvailablePatternProps> =
         </Typography>
       </CardContent>
       <CardActions>
-        <Button size="small" onClick={() => add(meta.name)}>Add</Button>
+        <Button variant="outlined" size="small" onClick={() => add(meta.name)}>Add</Button>
       </CardActions>
     </Card>
 
