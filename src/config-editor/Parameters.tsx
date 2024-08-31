@@ -2,13 +2,14 @@
 import React from 'react';
 
 import ItemParameters from './ItemParameters';
+import { Pattern, ParameterSet } from './Pattern';
 
 interface ParametersProps {
-    selection : any;
-    configuration : any;
+    selection : Pattern | null;
+    configuration : Pattern[];
     deployment : string | null;
-    parameters : any;
-    setParameters : any;
+    parameters : ParameterSet;
+    setParameters : (value : ParameterSet) => void;
 };
 
 const Parameters : React.FC<ParametersProps> =
@@ -23,6 +24,8 @@ const Parameters : React.FC<ParametersProps> =
             </div>
         );
 
+    if (selection == null) return null;
+
     return (
 
         <div className="card item-editor">
@@ -32,7 +35,7 @@ const Parameters : React.FC<ParametersProps> =
             configuration={configuration}
             parameters={parameters}
             setParameters={setParameters}
-            />
+        />
 
         </div>
         

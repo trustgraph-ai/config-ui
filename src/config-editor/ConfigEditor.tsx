@@ -1,11 +1,14 @@
 
 import { useState } from 'react';
+
 import './ConfigEditor.scss';
 import Plan from './Plan';
 import Catalog from './Catalog';
-import patterns from './patterns.json';
+import { Pattern, Arg, ParameterSet, PatternParameters } from './Pattern';
 import { generateDeployment } from './deployment';
-import { Pattern, Arg } from './Pattern';
+import patternsUntyped from './patterns.json';
+
+const patterns = (patternsUntyped as Pattern[]);
 
 // Workaround to make isSubsetOf work
 declare global {
@@ -38,24 +41,24 @@ function ConfigEditor() {
     const [configuration, setConfiguration] = useState<Pattern[]>([]);
     const [selection, setSelection] = useState<Pattern | null>(null);
     const [deployment, setDeployment] = useState<string | null>(null);
-    const [parameters, setParameters] = useState<any>({});
+    const [parameters, setParameters] = useState<ParameterSet>(new Map());
 
-    const patternMap = new Map<string, any>(
+    const patternMap : Map<string, Pattern> = new Map(
 	patterns.map(obj => [obj.pattern.name, obj])
     );
 
     const configurationFeatures = featuresMet(configuration);
 
     const available = patterns.filter(
-        (x : any) => dependenciesMet(x, configurationFeatures)
+        (x) => dependenciesMet(x, configurationFeatures)
     ).filter(
-	(x : any) => ! (new Set(configuration).has(x))
+	(x) => ! (new Set(configuration).has(x))
     );
 
     const unavailable = patterns.filter(
-        (x : any) => ! dependenciesMet(x, configurationFeatures)
+        (x) => ! dependenciesMet(x, configurationFeatures)
     ).filter(
-	(x : any) => ! (new Set(configuration).has(x))
+	(x) => ! (new Set(configuration).has(x))
     );
 
     function select(pattern : Pattern) {
@@ -73,7 +76,7 @@ function ConfigEditor() {
                 setSelection(null);
             }
         ).catch(
-            (err : any) => console.log("Error:", err)
+            (err) => console.log("Error:", err)
         );
 
     }
@@ -81,22 +84,33 @@ function ConfigEditor() {
     function add(x : string) {
 
         const pattern = patternMap.get(x);
+
+        if (!pattern) {
+            console.log("Unknown pattern", x);
+            return;
+        }
+
         const name = pattern.pattern.name;
+
         if (!(name in parameters)) {
-            let sparams : any = {};
+
+            let pparams : PatternParameters = new Map();
+
             pattern.pattern.args.map(
                 (field : Arg) => {
                     if (field.default)
-                        sparams[field.name] = field.default;
+                        pparams.set(field.name, field.default);
                     else
-                        sparams[field.name] = "";
+                        pparams.set(field.name, "");
                 }
             );
-            parameters[name] = sparams;
+
+            parameters.set(name, pparams);
+
         }
 
         setParameters(parameters);
-        setConfiguration([...configuration, patternMap.get(x)]);
+        setConfiguration([...configuration, pattern]);
         setDeployment(null);
     }
 

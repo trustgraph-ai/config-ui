@@ -1,5 +1,5 @@
 
-import { Pattern } from './Pattern';
+import { Pattern, ParameterSet } from './Pattern';
 import PlanItems from './PlanItems';
 import Parameters from './Parameters';
 
@@ -11,8 +11,8 @@ interface PlanProps {
     patterns : Pattern[]
     deploy : () => void;
     deployment : string | null;
-    parameters : any;
-    setParameters : any;
+    parameters : ParameterSet;
+    setParameters : (value : ParameterSet) => void;
 }
 
 const Plan : React.FC<PlanProps> =

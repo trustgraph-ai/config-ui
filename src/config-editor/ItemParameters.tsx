@@ -2,9 +2,10 @@
 import React from 'react';
 
 import Args from './Args';
+import { Pattern } from './Pattern';
 
 interface ItemParametersProps {
-    selection : any;
+    selection : Pattern;
     configuration : any;
     parameters : any;
     setParameters : any;
@@ -14,17 +15,17 @@ const ItemParameters : React.FC<ItemParametersProps> =
     ({ selection, configuration, parameters, setParameters }) =>
 {
 
+console.log(configuration);
  // FIXME: Shouldn't happen?
-    if (!selection) return;
-
-    const patternsInConfig = new Set<string>(configuration);
-
+//    if (!selection) return;
+/*
     if (!(selection.pattern.name in parameters)) {
         parameters = {
             ...parameters,
             [selection.pattern.name]: {}
         };
     }
+    */
 
     let sparams = parameters[selection.pattern.name];
 
@@ -35,13 +36,17 @@ const ItemParameters : React.FC<ItemParametersProps> =
         }
     );
 
-    const inConfig = patternsInConfig.has(selection);
+//    const inConfig = patternsInConfig.has(selection);
 
     return (
         <>
             <h2>{selection.pattern.title}</h2>
             <p>{selection.pattern.description}</p>
-            { (inConfig) ? ( <Args selection={selection} parameters={parameters} setParameters={setParameters}/> ) : null }
+            <Args
+                selection={selection}
+                parameters={parameters}
+                setParameters={setParameters}
+            />
         </>
         
     );

@@ -26,3 +26,7 @@ export interface Pattern {
     module : string;
 };
 
+export type ParameterValue = string | number;
+export type PatternParameters = Map<string,ParameterValue>;
+export type ParameterSet = Map<string,PatternParameters>;
+
