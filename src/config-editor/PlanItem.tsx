@@ -1,12 +1,8 @@
 
 import React from 'react';
 
-import Paper from '@mui/material/Paper';
-import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
-import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import { Delete, Settings } from '@mui/icons-material';
 
@@ -17,25 +13,31 @@ interface PlanItemProps {
     pattern : Pattern;
     select : (value : Pattern) => void;
     remove : (value : Pattern) => void;
-    selection : Pattern | null;
+    selected : boolean;
 }
 
 const PlanItem : React.FC<PlanItemProps> =
-    ({ pattern, select, remove, selection }) =>
+    ({ pattern, select, remove, selected }) =>
 {
 
     const meta = pattern.pattern;
 
     return (
-        <Card>
+        <Card sx={{
+            bgcolor: selected ? 'primary.main' : 'theme',
+            color: selected ? 'primary.contrastText' : 'theme',
+         }}>
             <CardHeader
                 avatar={getIcon(meta.category[0])}
                 title={meta.title}
                 action={
                 <>
-                <IconButton color="primary" size="small"
+                <IconButton
+                    size="small"
                     onClick={() => select(pattern)}>
-                    <Settings/>
+                    <Settings sx={{
+                       color: selected ? 'primary.contrastText' : 'text.primary'
+                     }}/>
                 </IconButton>
                 <IconButton color="warning" size="small"
                     onClick={() => remove(pattern)}>

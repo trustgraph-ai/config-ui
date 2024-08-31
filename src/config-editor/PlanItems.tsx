@@ -2,6 +2,7 @@
 import React from 'react';
 
 import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 
 import { Pattern } from './Pattern';
 import PlanItem from './PlanItem';
@@ -42,7 +43,7 @@ const PlanItems : React.FC<PlanItemsProps> =
 
             <h2>Your configuration patterns</h2>
 
-<Stack>
+            <Stack>
                 {
                     configuration.map((p) => (
                         <PlanItem
@@ -50,17 +51,15 @@ const PlanItems : React.FC<PlanItemsProps> =
                             pattern={p}
                             select={select}
                             remove={remove}
-                            selection={selection}
+                            selected={selection == p ? true : false}
                         />
                     ))
                 }
-                </Stack>
+           </Stack>
 
-           <div>
-               <button onClick={() => deploy()}>
-                   Create deployable configuration
-               </button>
-           </div>
+           <Button variant="outlined" size="small" onClick={() => deploy()}>
+               Create deployment configuration
+           </Button>
 
         </div>
     );
