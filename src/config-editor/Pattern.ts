@@ -13,6 +13,7 @@ export interface PatternMetadata {
     title : string;
     description : string;
     icon : string;
+    category : string[];
 
     features : string[];
     requires : string[];

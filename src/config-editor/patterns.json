@@ -3,6 +3,9 @@
       "module": "components/pulsar.jsonnet",
       "pattern": {
          "args": [ ],
+         "category": [
+            "foundation"
+         ],
          "description": "Deploy Pulsar as the inter-process messaging fabric.  Pulsar is a Cloud-native, distributed messaging and Streaming. Apache Pulsar is an open-source, distributed messaging and streaming platform built for the cloud.  Trustgraph uses Pulsar to manage the message flow between all components.",
          "features": [
             "pulsar"
@@ -26,6 +29,9 @@
                "width": 20
             }
          ],
+         "category": [
+            "foundation"
+         ],
          "description": "Adds Pulsar Manager which provides a web interface to manage Pulsar.  Pulsar Manager is a large container and deployment requiring over 1GB of RAM, so is not deployed by default.  This is not a required component, it may be useful to help manage a large operational deployment.",
          "features": [
             "pulsar-manager"
@@ -42,6 +48,9 @@
       "module": "components/trustgraph.jsonnet",
       "pattern": {
          "args": [ ],
+         "category": [
+            "foundation"
+         ],
          "description": "This pattern adds a core set of Trustgraph flows, including PDF ingest, chunking, embeddings, and knowledge graph extraction.  You should also consider adding an LLM and at least one RAG processing flow.",
          "features": [
             "trustgraph"
@@ -58,6 +67,9 @@
       "module": "components/cassandra.jsonnet",
       "pattern": {
          "args": [ ],
+         "category": [
+            "knowledge-graph"
+         ],
          "description": "The core Trustgraph deployment does not include a GraphRag store; this pattern adds the Cassandra store, and adds GraphRAG adapters so that Cassandra is integrated with GraphRag indexing and querying.",
          "features": [
             "cassandra",
@@ -76,6 +88,9 @@
       "module": "components/neo4j.jsonnet",
       "pattern": {
          "args": [ ],
+         "category": [
+            "knowledge-graph"
+         ],
          "description": "The core Trustgraph deployment does not include a GraphRag store; this pattern adds the Neo4j store, and adds GraphRAG adapters so that Neo4j is integrated with GraphRag indexing and querying.",
          "features": [
             "neo4j",
@@ -103,6 +118,9 @@
                "width": 2000
             }
          ],
+         "category": [
+            "prompting"
+         ],
          "description": "This pattern overrides the default knowledge query LLM prompt allowing you to provide your own prompt.",
          "features": [
             "kg-query-prompt"
@@ -128,6 +146,9 @@
                "type": "string",
                "width": 2000
             }
+         ],
+         "category": [
+            "prompting"
          ],
          "description": "This pattern overrides the default definition extraction LLM prompt allowing you to provide your own prompt.",
          "features": [
@@ -155,6 +176,9 @@
                "width": 2000
             }
          ],
+         "category": [
+            "prompting"
+         ],
          "description": "This pattern overrides the default relationship extraction LLM prompt allowing you to provide your own prompt.",
          "features": [
             "extract-relationship-prompt"
@@ -181,6 +205,9 @@
                "width": 2000
             }
          ],
+         "category": [
+            "prompting"
+         ],
          "description": "This pattern overrides the default document query prompt used for DocumentRAG allowing you to specify your own prompt.",
          "features": [
             "document-query-prompt"
@@ -206,6 +233,9 @@
                "type": "string",
                "width": 2000
             }
+         ],
+         "category": [
+            "prompting"
          ],
          "description": "This pattern overrides the default table/row extraction prompt to be changed.  This is used for DatabaseRAG pipelines.",
          "features": [
@@ -239,6 +269,9 @@
                "type": "int"
             }
          ],
+         "category": [
+            "chunking"
+         ],
          "description": "The default chunker used in Trustgraph core is a token-based chunker.  This pattern replaces that with a recursive chunker, and allows ou to configure the chunking parameters.",
          "features": [ ],
          "icon": "✂️🪚",
@@ -254,6 +287,9 @@
       "module": "components/azure.jsonnet",
       "pattern": {
          "args": [ ],
+         "category": [
+            "llm"
+         ],
          "description": "This pattern integrates an Azure LLM endpoint hosted in the Azure cloud for text completion operations.  You need an Azure subscription and to have an endpoint deployed to be able to use this service.",
          "features": [
             "llm"
@@ -271,6 +307,9 @@
       "module": "components/bedrock.jsonnet",
       "pattern": {
          "args": [ ],
+         "category": [
+            "llm"
+         ],
          "description": "This pattern integrates an AWS Bedrock LLM service hosted in the AWS cloud for text completion operations.  You need an AWS cloud subscription and to have Bedrock configured to be able to use this service.",
          "features": [
             "llm"
@@ -288,6 +327,9 @@
       "module": "components/claude.jsonnet",
       "pattern": {
          "args": [ ],
+         "category": [
+            "llm"
+         ],
          "description": "This pattern integrates an Anthropic Claude LLM service for text completion operations.  You need a Claude subscription to be able to use this service.",
          "features": [
             "llm"
@@ -305,6 +347,9 @@
       "module": "components/cohere.jsonnet",
       "pattern": {
          "args": [ ],
+         "category": [
+            "llm"
+         ],
          "description": "This pattern integrates the Cohere LLM service for text completion operations.  You need a Cohere subscription and API keys to be able to use this service.",
          "features": [
             "llm"
@@ -322,6 +367,9 @@
       "module": "components/ollama.jsonnet",
       "pattern": {
          "args": [ ],
+         "category": [
+            "llm"
+         ],
          "description": "This pattern integrates an Ollama service for text completion operations.  You need to have a running Ollama service with the necessary models added in order to be able to use this service.",
          "features": [
             "llm"
@@ -339,6 +387,9 @@
       "module": "components/openai.jsonnet",
       "pattern": {
          "args": [ ],
+         "category": [
+            "llm"
+         ],
          "description": "This pattern integrates an OpenAI LLM service for text completion operations.  You need an OpenAI subscription and have an API key to be able to use this service.",
          "features": [
             "llm"
@@ -356,6 +407,9 @@
       "module": "components/vertexai.jsonnet",
       "pattern": {
          "args": [ ],
+         "category": [
+            "llm"
+         ],
          "description": "This pattern integrates a VertexAI endpoint hosted in Google Cloud for text completion operations.  You need a GCP subscription and to have VertexAI enabled to be able to use this service.",
          "features": [
             "llm"
@@ -373,6 +427,9 @@
       "module": "components/milvus.jsonnet",
       "pattern": {
          "args": [ ],
+         "category": [
+            "vector-store"
+         ],
          "description": "The Trustgraph core does not include a vector store by default.  This configuration pattern adds a simple Milvus store and integrates with embeddings handling.",
          "features": [
             "milvus",
@@ -391,6 +448,9 @@
       "module": "components/qdrant.jsonnet",
       "pattern": {
          "args": [ ],
+         "category": [
+            "vector-store"
+         ],
          "description": "The Trustgraph core does not include a vector store by default.  This configuration pattern adds a simple Qdrant store and integrates with embeddings handling.",
          "features": [
             "qdrant",
@@ -409,6 +469,9 @@
       "module": "components/grafana.jsonnet",
       "pattern": {
          "args": [ ],
+         "category": [
+            "monitoring"
+         ],
          "description": "System monitoring and dashboarding using Grafana and Prometheus",
          "features": [
             "prometheus",
