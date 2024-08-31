@@ -9,6 +9,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
 
 import AvailablePattern from './AvailablePattern';
+import UnavailablePattern from './UnavailablePattern';
 
 interface CatalogSectionProps {
     id : string,
@@ -32,12 +33,21 @@ const CatalogSection : React.FC<CatalogSectionProps> =
                 <div className="catalog-section">
                 {
                     patterns.map(
-                        pat => (
-                            <AvailablePattern
-                                key={pat.pattern.name}
-                                pattern={pat}
-                                add={add}/>
-                        )
+                        pat => {
+                            if (id != "unavailable")
+                                return (
+                                    <AvailablePattern
+                                        key={pat.pattern.name}
+                                        pattern={pat}
+                                        add={add}/>
+                                );
+                            else
+                                return (
+                                    <UnavailablePattern
+                                        key={pat.pattern.name}
+                                        pattern={pat}/>
+                                );
+                        }
                     )
                 }
                 </div>

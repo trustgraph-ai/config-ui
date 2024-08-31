@@ -42,6 +42,12 @@ const Catalog : React.FC<CatalogProps> =
         cat => cat.patterns.length > 0
     );
 
+    catalog.push({
+        id: "unavailable",
+        name: "Unavailable (dependencies not met)",
+        patterns: unavailable
+    });
+
     return (
         <div className="card">
 
