@@ -1,9 +1,20 @@
 
+import React from 'react';
+
 import { Pattern } from './Pattern';
 
-function PlanItems({
-    configuration, remove, select, selected, deploy
-} : any) {
+interface PlanItemsProps {
+    configuration : Pattern[];
+    remove : (value : Pattern) => void;
+    select : (value : Pattern) => void;
+    selection : Pattern | null;
+    deploy : () => void;
+    patterns : Pattern[];
+}
+
+const PlanItems : React.FC<PlanItemsProps> =
+    ({ configuration, remove, select, selection, deploy}) =>
+{
 
     if (configuration.length == 0) return (
         <div className="card plan-items">
@@ -31,7 +42,7 @@ function PlanItems({
                 {
                     configuration.map((n : Pattern) => (
                         <div key={n.pattern.name}
-                            className={(n == selected) ? "plan-item selected" : "plan-item"}
+                            className={(n == selection) ? "plan-item selection" : "plan-item"}
                             >
                             <div>{n.pattern.icon} {n.pattern.title}</div>
                             <div>

@@ -125,9 +125,7 @@ function ConfigEditor() {
                 <h1>Config editor</h1>
 
                 <Plan
-                    available={available} unavailable={unavailable}
                     configuration={configuration}
-                    add={add}
                     remove={remove}
                     selection={selection}
                     select={select}
@@ -142,8 +140,6 @@ function ConfigEditor() {
                     available={available}
                     unavailable={unavailable}
                     add={add}
-                    select={select}
-                    selection={selection}
                     patterns={patterns}
                 />
 

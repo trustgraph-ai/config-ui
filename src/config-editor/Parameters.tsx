@@ -1,4 +1,8 @@
 
+import React from 'react';
+
+import { Pattern } from './Pattern';
+
 function change(
     pattern : any,
     field : any,
@@ -16,7 +20,15 @@ function change(
     setParameters(newParams);
 }
 
-function Args({selection, parameters, setParameters} : any) {
+interface ArgsProps {
+    selection : Pattern;
+    parameters : any;
+    setParameters : any;
+};
+
+const Args : React.FC<ArgsProps> =
+    ({ selection, parameters, setParameters }) => 
+{
 
     return selection.pattern.args.map(
         (field : any) => 
@@ -35,10 +47,18 @@ function Args({selection, parameters, setParameters} : any) {
 
 }
 
-function ItemParameters({
-    selection, configuration, parameters, setParameters,
-} : any) {
+interface ItemParametersProps {
+    selection : any;
+    configuration : any;
+    parameters : any;
+    setParameters : any;
+};
 
+const ItemParameters : React.FC<ItemParametersProps> = 
+    ({ selection, configuration, parameters, setParameters }) =>
+{
+
+ // FIXME: Shouldn't happen?
     if (!selection) return;
 
     const patternsInConfig = new Set<string>(configuration);
@@ -72,10 +92,17 @@ function ItemParameters({
 
 }
 
-function Parameters({
-    selection, configuration, deployment,
-    parameters, setParameters,
-} : any) {
+interface ParametersProps {
+    selection : any;
+    configuration : any;
+    deployment : string | null;
+    parameters : any;
+    setParameters : any;
+};
+
+const Parameters : React.FC<ParametersProps> =
+    ({ selection, configuration, deployment, parameters, setParameters }) =>
+{    
 
     if (deployment)
         return (

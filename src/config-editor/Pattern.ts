@@ -1,11 +1,11 @@
 
 export interface Arg {
-    default : string;
+    default : string | number;
     description : string;
     name : string;
     required? : Boolean;
     type : string;
-    width : number;
+    width? : number;
 };
 
 export interface PatternMetadata {

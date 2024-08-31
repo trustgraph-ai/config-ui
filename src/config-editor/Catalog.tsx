@@ -1,14 +1,24 @@
 
-function Available({
-    available, unavailable, add, patterns
-} : any) {
+import React from 'react';
+import { Pattern } from './Pattern';
 
-    let featureMap = new Map<string, any>();
+interface CatalogProps {
+    available : Pattern[],
+    unavailable : Pattern[],
+    add : (value : string) => void;
+    patterns : Pattern[]
+}
+
+const Catalog : React.FC<CatalogProps> =
+    ({ available, unavailable, add, patterns}) =>
+{
+
+    let featureMap = new Map<string, string>();
 
     patterns.map(
-        (p : any) =>
+        (p) =>
             p.pattern.features.map(
-                (f : any) => {
+                (f) => {
                     featureMap.set(f, p.pattern.title);
                 }
             )
@@ -24,7 +34,7 @@ function Available({
             <div className="catalog">
 
                 {
-                    available.map((n : any) => (
+                    available.map((n) => (
                         <div
                             className="catalog-item available"
                             key={n.pattern.name}
@@ -42,7 +52,7 @@ function Available({
                 }
 
                 {
-                    unavailable.map((n : any) => (
+                    unavailable.map((n) => (
                         <div
                             className="catalog-item unavailable"
                             key={n.pattern.name}
@@ -53,7 +63,7 @@ function Available({
                             {
 
                                 n.pattern.requires.map(
-                                    (p : any) => (
+                                    (p) => (
                                         <span
                                             className="dep"
                                            key={p}
@@ -78,5 +88,5 @@ function Available({
 
 }
 
-export default Available;
+export default Catalog;
 
