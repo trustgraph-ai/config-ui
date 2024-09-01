@@ -1,17 +1,16 @@
 
 import React from 'react';
 
-import Button from '@mui/material/Button';
-import { ContentPaste } from '@mui/icons-material';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 
-import ItemParameters from './ItemParameters';
+import Parameter from './Parameter';
 import {
     Pattern, ParameterSet, ParameterDefinition, ParameterValue
 } from './Pattern';
 
 interface ParametersProps {
-    selection : Pattern | null;
-    deployment : string | null;
+    pattern : Pattern;
     parameters : ParameterSet;
     setParameter : (
         pattern : Pattern, field : ParameterDefinition,
@@ -20,42 +19,40 @@ interface ParametersProps {
 };
 
 const Parameters : React.FC<ParametersProps> =
-    ({ selection, deployment, parameters, setParameter }) =>
-{    
+    ({ pattern, parameters, setParameter }) => 
+{
 
-    const copyToClipboard = () => {
-        if (deployment) {
-            navigator.clipboard.writeText(deployment);
-        }
-    }
-
-    if (deployment)
-        return (
-            <div className="card deployment-config">
-                <h2>Deployment configuration</h2>
-                <textarea value={deployment} readOnly={true}/>
-                <Button onClick={copyToClipboard} variant="outlined"
-                    startIcon={<ContentPaste/>}
-                >
-                    Copy to clipboard
-                </Button>
-            </div>
-        );
-
-    if (selection == null) return null;
+    const params = parameters.get(pattern.pattern.name)!;
 
     return (
+        <Stack spacing={3}>
 
-        <div className="card item-editor">
+        {
+            pattern.pattern.args.map(
+                (field) => {
 
-        <ItemParameters
-            selection={selection}
-            parameters={parameters}
-            setParameter={setParameter}
-        />
+                    let value = params.get(field.name);
+                    if (value == null || value == undefined) value = "";
 
-        </div>
-        
+                    const set = (value : ParameterValue) => {
+                        setParameter(pattern, field, value);
+                    }
+
+                    return (
+                        <Box key={field.name}>
+                            <Parameter
+                                field={field}
+                                value={value}
+                                setParameter={set}
+                                />
+                        </Box>
+                    );
+                }
+           )
+       }
+
+       </Stack>
+
     );
 
 }

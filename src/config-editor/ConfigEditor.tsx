@@ -76,7 +76,6 @@ function ConfigEditor() {
         field : ParameterDefinition,
         value : ParameterValue) {
 
-console.log(">", pattern.pattern.name, field.name, value);
         changeParam(
             pattern.pattern.name, field.name, value,
             parameters, setParameters

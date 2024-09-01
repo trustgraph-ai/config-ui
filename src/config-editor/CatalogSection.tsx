@@ -5,6 +5,7 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Stack from '@mui/material/Stack';
 
 import AvailablePattern from './AvailablePattern';
 import UnavailablePattern from './UnavailablePattern';
@@ -29,7 +30,10 @@ const CatalogSection : React.FC<CatalogSectionProps> =
                 {name}
             </AccordionSummary>
             <AccordionDetails>
-                <div className="catalog-section">
+                <Stack
+                    direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}
+                    useFlexGap={true}
+                >
                 {
                     patterns.map(
                         pat => {
@@ -49,7 +53,7 @@ const CatalogSection : React.FC<CatalogSectionProps> =
                         }
                     )
                 }
-                </div>
+                </Stack>
             </AccordionDetails>
         </Accordion>
     );

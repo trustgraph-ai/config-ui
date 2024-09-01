@@ -3,7 +3,7 @@ import {
     Pattern, ParameterSet, ParameterDefinition, ParameterValue
 } from './Pattern';
 import PlanItems from './PlanItems';
-import Parameters from './Parameters';
+import Details from './Details';
 
 interface PlanProps {
     configuration : Pattern[];
@@ -37,7 +37,7 @@ const Plan : React.FC<PlanProps> =
                 deploy={deploy}
             />
 
-            <Parameters
+            <Details
                 selection={selection}
                 deployment={deployment}
                 parameters={parameters}

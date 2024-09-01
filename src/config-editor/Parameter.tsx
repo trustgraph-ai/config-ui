@@ -16,7 +16,7 @@ import {
     ParameterDefinition, ParameterValue
 } from './Pattern';
 
-interface ArgProps {
+interface ParameterProps {
     field : ParameterDefinition,
     value : ParameterValue,
     setParameter : (
@@ -24,7 +24,7 @@ interface ArgProps {
     ) => void;
 };
 
-const Arg : React.FC<ArgProps> =
+const Parameter : React.FC<ParameterProps> =
     ({ field, value, setParameter }) => 
 {
 
@@ -174,5 +174,5 @@ const Arg : React.FC<ArgProps> =
 
 }
 
-export default Arg;
+export default Parameter;
 

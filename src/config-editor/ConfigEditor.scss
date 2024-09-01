@@ -54,24 +54,11 @@
         }
         
         .item-editor {
-
             width: 60%;
-
-            textarea {
-                width: 98%;
-                height: 15rem;
-            } 
-
         }
-        
+
         .deployment-config {
-
             width: 60%;
-
-            textarea {
-                width: 98%;
-                height: 25rem;
-            } 
 
         }
 
@@ -84,16 +71,6 @@
 	flex-wrap: column;
 	row-gap: 0.5rem;
 	column-gap: 0.5rem;
-
-        .catalog-section {
-
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            justify-content: start;
-            margin: auto;
-            
-        }
 
     }
 

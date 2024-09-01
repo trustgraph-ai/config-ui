@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Pattern } from './Pattern';
-import CatalogContent from './CatalogContent';
+import CatalogSection from './CatalogSection';
 
 const categories : { id : string; name : string }[] = [
     { id: "foundation", name: "Foundation" },
@@ -51,7 +51,23 @@ const Catalog : React.FC<CatalogProps> =
             <h2>Configuration pattern catalog</h2>
 
             <div className="catalog">
-                <CatalogContent catalog={catalog} add={add}/>
+
+                {
+                    catalog.map(
+                        cat => {
+                            return (
+                                <CatalogSection
+                                    key={cat.id}
+                                    id={cat.id}
+                                    name={cat.name}
+                                    patterns={cat.patterns}
+                                    add={add}
+                                    />
+                            )
+                       }
+                   )
+               }
+
             </div>
 
         </div>
