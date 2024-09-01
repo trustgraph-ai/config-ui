@@ -24,7 +24,7 @@ const AvailablePattern : React.FC<AvailablePatternProps> =
 
     return (
 
-    <Card variant="outlined" sx={{ minWidth: 275, maxWidth: 350 }}>
+    <Card variant="outlined" sx={{ width: 325 }}>
       <CardHeader
         avatar={getIcon(pattern.pattern.category[0])}
         title={pattern.pattern.title}

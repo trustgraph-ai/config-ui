@@ -5,6 +5,7 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Stack from '@mui/material/Stack';
 
 import AvailablePattern from './AvailablePattern';
 import UnavailablePattern from './UnavailablePattern';
@@ -29,13 +30,17 @@ const CatalogSection : React.FC<CatalogSectionProps> =
                 {name}
             </AccordionSummary>
             <AccordionDetails>
-                <div className="catalog-section">
+                <Stack
+                    direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}
+                    useFlexGap={true}
+                >
                 {
                     patterns.map(
                         pat => {
                             if (id != "unavailable")
                                 return (
                                     <AvailablePattern
+                                        sx={{ p: "14rem" }}
                                         key={pat.pattern.name}
                                         pattern={pat}
                                         add={add}/>
@@ -43,13 +48,14 @@ const CatalogSection : React.FC<CatalogSectionProps> =
                             else
                                 return (
                                     <UnavailablePattern
+                                        sx={{ m: "1rem" }}
                                         key={pat.pattern.name}
                                         pattern={pat}/>
                                 );
                         }
                     )
                 }
-                </div>
+                </Stack>
             </AccordionDetails>
         </Accordion>
     );
