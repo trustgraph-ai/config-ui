@@ -10,7 +10,7 @@ import {
     Pattern, ParameterSet, ParameterDefinition, ParameterValue
 } from './Pattern';
 
-interface ParametersProps {
+interface DetailsProps {
     selection : Pattern | null;
     deployment : string | null;
     parameters : ParameterSet;
@@ -20,7 +20,7 @@ interface ParametersProps {
     ) => void;
 };
 
-const Parameters : React.FC<ParametersProps> =
+const Details : React.FC<DetailsProps> =
     ({ selection, deployment, parameters, setParameter }) =>
 {    
 
@@ -81,5 +81,5 @@ const Parameters : React.FC<ParametersProps> =
 
 }
 
-export default Parameters;
+export default Details;
 
