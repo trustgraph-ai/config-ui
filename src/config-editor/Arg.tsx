@@ -109,32 +109,30 @@ const Arg : React.FC<ArgProps> =
         console.log(value);
         return (
             <>
-            <Stack alignItems="left">
-            <Box sx={{width: "80%", ml: "1rem", mr: "1rem" }}>
-            <Typography gutterBottom>
-              {field.label}
-            </Typography>
-                <Slider
-                    sx={{ width: "80%", ml: 0, mr: 0 }}
-                    label={field.label}
-                    type="number"
-                    value={Number(value)}
-                    min={field.min}
-                    max={field.max}
-                    valueLabelDisplay="auto"
-                    step={field.step}
-                    onChange={e => {
-                        if (!e.target) return;
-                        setParameter(
-                            (e.target as HTMLInputElement).value
-                        );
-                    }}
-                />
-                <Box>{value}</Box>
-            <Typography variant="caption" gutterBottom>
-              {field.description}
-            </Typography>
-                </Box>
+                <Stack alignItems="left">
+                    <Box sx={{width: "80%", ml: "1rem", mr: "1rem" }}>
+                    <Typography gutterBottom>
+                      {field.label}
+                    </Typography>
+                    <Slider
+                        sx={{ width: "80%", ml: 0, mr: 0 }}
+                        value={Number(value)}
+                        min={field.min}
+                        max={field.max}
+                        valueLabelDisplay="auto"
+                        step={field.step}
+                        onChange={e => {
+                            if (!e.target) return;
+                            setParameter(
+                                (e.target as HTMLInputElement).value
+                            );
+                        }}
+                    />
+                    <Box>{value}</Box>
+                    <Typography variant="caption" gutterBottom>
+                        {field.description}
+                    </Typography>
+                    </Box>
                 </Stack>
             </>
         );
