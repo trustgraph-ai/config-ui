@@ -2,7 +2,65 @@
    {
       "module": "components/pulsar.jsonnet",
       "pattern": {
-         "args": [ ],
+         "args": [
+            {
+               "default": "Template\none\ntwo",
+               "description": "Multi-line",
+               "label": "Definition prompt",
+               "name": "prompt-definition-template",
+               "required": true,
+               "rows": 10,
+               "size": 2000,
+               "type": "multiline"
+            },
+            {
+               "default": "Template",
+               "description": "Definition extraction prompt",
+               "label": "Prompt",
+               "name": "prompt",
+               "required": true,
+               "type": "text",
+               "width": 20
+            },
+            {
+               "default": 123,
+               "description": "An integer number",
+               "label": "Number 2",
+               "name": "number2",
+               "required": true,
+               "type": "integer"
+            },
+            {
+               "default": 1.2455000000000001,
+               "description": "A float number",
+               "label": "Number 3",
+               "name": "number3",
+               "required": true,
+               "type": "float"
+            },
+            {
+               "default": "two",
+               "description": "A selction",
+               "label": "Option 4",
+               "name": "options4",
+               "options": [
+                  {
+                     "description": "One",
+                     "id": "one"
+                  },
+                  {
+                     "description": "Two",
+                     "id": "two"
+                  },
+                  {
+                     "description": "Three",
+                     "id": "three"
+                  }
+               ],
+               "required": true,
+               "type": "select"
+            }
+         ],
          "category": [
             "foundation"
          ],
@@ -17,7 +75,7 @@
       }
    },
    {
-      "module": "components/pulsar-manager.jsonnet",
+      "module": "components/pulsar.jsonnet",
       "pattern": {
          "args": [
             {
@@ -25,7 +83,7 @@
                "description": "Admin password to apply",
                "name": "default-admin-password",
                "required": true,
-               "type": "string",
+               "type": "text",
                "width": 20
             }
          ],
@@ -114,7 +172,7 @@
                "description": "Knowledge graph extraction prompt",
                "name": "prompt-knowledge-query-template",
                "required": true,
-               "type": "string",
+               "type": "text",
                "width": 2000
             }
          ],
@@ -143,7 +201,7 @@
                "description": "Definition extraction prompt",
                "name": "prompt-definition-template",
                "required": true,
-               "type": "string",
+               "type": "text",
                "width": 2000
             }
          ],
@@ -172,7 +230,7 @@
                "description": "Relationship extraction prompt",
                "name": "prompt-relationship-template",
                "required": true,
-               "type": "string",
+               "type": "text",
                "width": 2000
             }
          ],
@@ -201,7 +259,7 @@
                "description": "Document query prompt",
                "name": "prompt-document-query-template",
                "required": true,
-               "type": "string",
+               "type": "text",
                "width": 2000
             }
          ],
@@ -230,7 +288,7 @@
                "description": "Row data extraction prompt",
                "name": "prompt-rows-template",
                "required": true,
-               "type": "string",
+               "type": "text",
                "width": 2000
             }
          ],
@@ -259,14 +317,14 @@
                "description": "Chunk size value",
                "name": "chunk-size",
                "required": true,
-               "type": "int"
+               "type": "integer"
             },
             {
                "default": 100,
                "description": "Overlap size value",
                "name": "chunk-overlap",
                "required": true,
-               "type": "int"
+               "type": "integer"
             }
          ],
          "category": [
@@ -286,7 +344,26 @@
    {
       "module": "components/azure.jsonnet",
       "pattern": {
-         "args": [ ],
+         "args": [
+            {
+               "default": 4096,
+               "description": "Limit on number tokens to generate",
+               "label": "Maximum output tokens",
+               "name": "azure-max-output-tokens",
+               "required": true,
+               "type": "integer"
+            },
+            {
+               "default": 0.5,
+               "description": "Controlling predictability / creativity balance",
+               "label": "Temperature",
+               "max": 1,
+               "min": 0,
+               "name": "azure-temperature",
+               "step": 0.050000000000000003,
+               "type": "slider"
+            }
+         ],
          "category": [
             "llm"
          ],
@@ -306,7 +383,16 @@
    {
       "module": "components/bedrock.jsonnet",
       "pattern": {
-         "args": [ ],
+         "args": [
+            {
+               "default": 4096,
+               "description": "Limit on number tokens to generate",
+               "label": "Maximum output tokens",
+               "name": "bedrock-max-output-tokens",
+               "required": true,
+               "type": "integer"
+            }
+         ],
          "category": [
             "llm"
          ],

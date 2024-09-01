@@ -2,6 +2,7 @@
 import React from 'react';
 
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 
 import Arg from './Arg';
 import {
@@ -23,26 +24,34 @@ const Args : React.FC<ArgsProps> =
 
     const params = parameters.get(pattern.pattern.name)!;
 
-    return pattern.pattern.args.map(
-        (field) => {
+    return (
+        <Stack spacing={3}>
 
-            let value = params.get(field.name);
-            if (!value) value = "";
+        {
+            pattern.pattern.args.map(
+                (field) => {
 
-            const set = (value : ParameterValue) => {
-                setParameter(pattern, field, value);
-            }
+                    let value = params.get(field.name);
+                    if (value == null || value == undefined) value = "";
 
-            return (
-                <Box key={field.name}>
-                    <Arg
-                        field={field}
-                        value={value}
-                        setParameter={set}
-                        />
-                </Box>
-            );
-        }
+                    const set = (value : ParameterValue) => {
+                        setParameter(pattern, field, value);
+                    }
+
+                    return (
+                        <Box key={field.name}>
+                            <Arg
+                                field={field}
+                                value={value}
+                                setParameter={set}
+                                />
+                        </Box>
+                    );
+                }
+           )
+       }
+
+       </Stack>
 
     );
 

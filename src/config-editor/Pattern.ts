@@ -3,9 +3,11 @@ export interface ParameterDefinition {
     default : string | number;
     description : string;
     name : string;
-    required? : Boolean;
+    label : string;
+    required : Boolean;
     type : string;
-    width? : number;
+    size? : number;
+    rows? : number;
 };
 
 export interface PatternMetadata {
