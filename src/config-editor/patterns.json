@@ -2,65 +2,7 @@
    {
       "module": "components/pulsar.jsonnet",
       "pattern": {
-         "args": [
-            {
-               "default": "Template\none\ntwo",
-               "description": "Multi-line",
-               "label": "Definition prompt",
-               "name": "prompt-definition-template",
-               "required": true,
-               "rows": 10,
-               "size": 2000,
-               "type": "multiline"
-            },
-            {
-               "default": "Template",
-               "description": "Definition extraction prompt",
-               "label": "Prompt",
-               "name": "prompt",
-               "required": true,
-               "type": "text",
-               "width": 20
-            },
-            {
-               "default": 123,
-               "description": "An integer number",
-               "label": "Number 2",
-               "name": "number2",
-               "required": true,
-               "type": "integer"
-            },
-            {
-               "default": 1.2455000000000001,
-               "description": "A float number",
-               "label": "Number 3",
-               "name": "number3",
-               "required": true,
-               "type": "float"
-            },
-            {
-               "default": "two",
-               "description": "A selction",
-               "label": "Option 4",
-               "name": "options4",
-               "options": [
-                  {
-                     "description": "One",
-                     "id": "one"
-                  },
-                  {
-                     "description": "Two",
-                     "id": "two"
-                  },
-                  {
-                     "description": "Three",
-                     "id": "three"
-                  }
-               ],
-               "required": true,
-               "type": "select"
-            }
-         ],
+         "args": [ ],
          "category": [
             "foundation"
          ],
@@ -80,11 +22,12 @@
          "args": [
             {
                "default": "pulsaradmin",
-               "description": "Admin password to apply",
-               "name": "default-admin-password",
+               "description": "Admin password to apply at initialisation",
+               "label": "Password",
+               "name": "initial-admin-password",
                "required": true,
                "type": "text",
-               "width": 20
+               "width": 40
             }
          ],
          "category": [
@@ -105,7 +48,46 @@
    {
       "module": "components/trustgraph.jsonnet",
       "pattern": {
-         "args": [ ],
+         "args": [
+            {
+               "default": "all-MiniLM-L6-v2",
+               "description": "Embeddings model for sentence analysis",
+               "label": "Embeddings model",
+               "name": "embeddings-model",
+               "options": [
+                  {
+                     "description": "all-MiniLM-L6-v2",
+                     "id": "all-MiniLM-L6-v2"
+                  }
+               ],
+               "required": true,
+               "type": "select"
+            },
+            {
+               "default": 50,
+               "description": "Limit on entities to fetch from vector store",
+               "label": "GraphRAG entity query limit",
+               "name": "graph-rag-entity-limit",
+               "required": true,
+               "type": "integer"
+            },
+            {
+               "default": 30,
+               "description": "Limit on triples to fetch from triple store",
+               "label": "GraphRAG triple query limit",
+               "name": "graph-rag-triple-limit",
+               "required": true,
+               "type": "integer"
+            },
+            {
+               "default": 3000,
+               "description": "Limit on size of subgraph to present to text-completion model",
+               "label": "GraphRAG maximum subgraph size",
+               "name": "graph-rag-max-subgraph-size",
+               "required": true,
+               "type": "integer"
+            }
+         ],
          "category": [
             "foundation"
          ],
@@ -172,8 +154,9 @@
                "description": "Knowledge graph extraction prompt",
                "name": "prompt-knowledge-query-template",
                "required": true,
-               "type": "text",
-               "width": 2000
+               "rows": 10,
+               "size": 2000,
+               "type": "multiline"
             }
          ],
          "category": [
@@ -201,8 +184,9 @@
                "description": "Definition extraction prompt",
                "name": "prompt-definition-template",
                "required": true,
-               "type": "text",
-               "width": 2000
+               "rows": 10,
+               "size": 2000,
+               "type": "multiline"
             }
          ],
          "category": [
@@ -230,8 +214,9 @@
                "description": "Relationship extraction prompt",
                "name": "prompt-relationship-template",
                "required": true,
-               "type": "text",
-               "width": 2000
+               "rows": 10,
+               "size": 2000,
+               "type": "multiline"
             }
          ],
          "category": [
@@ -259,8 +244,9 @@
                "description": "Document query prompt",
                "name": "prompt-document-query-template",
                "required": true,
-               "type": "text",
-               "width": 2000
+               "rows": 10,
+               "size": 2000,
+               "type": "multiline"
             }
          ],
          "category": [
@@ -288,8 +274,9 @@
                "description": "Row data extraction prompt",
                "name": "prompt-rows-template",
                "required": true,
-               "type": "text",
-               "width": 2000
+               "rows": 10,
+               "size": 2000,
+               "type": "multiline"
             }
          ],
          "category": [
@@ -391,6 +378,16 @@
                "name": "bedrock-max-output-tokens",
                "required": true,
                "type": "integer"
+            },
+            {
+               "default": 0.5,
+               "description": "Controlling predictability / creativity balance",
+               "label": "Temperature",
+               "max": 1,
+               "min": 0,
+               "name": "bedrock-temperature",
+               "step": 0.050000000000000003,
+               "type": "slider"
             }
          ],
          "category": [
@@ -412,7 +409,26 @@
    {
       "module": "components/claude.jsonnet",
       "pattern": {
-         "args": [ ],
+         "args": [
+            {
+               "default": 4096,
+               "description": "Limit on number tokens to generate",
+               "label": "Maximum output tokens",
+               "name": "claude-max-output-tokens",
+               "required": true,
+               "type": "integer"
+            },
+            {
+               "default": 0.5,
+               "description": "Controlling predictability / creativity balance",
+               "label": "Temperature",
+               "max": 1,
+               "min": 0,
+               "name": "claude-temperature",
+               "step": 0.050000000000000003,
+               "type": "slider"
+            }
+         ],
          "category": [
             "llm"
          ],
@@ -432,7 +448,26 @@
    {
       "module": "components/cohere.jsonnet",
       "pattern": {
-         "args": [ ],
+         "args": [
+            {
+               "default": 4096,
+               "description": "Limit on number tokens to generate",
+               "label": "Maximum output tokens",
+               "name": "cohere-max-output-tokens",
+               "required": true,
+               "type": "integer"
+            },
+            {
+               "default": 0.5,
+               "description": "Controlling predictability / creativity balance",
+               "label": "Temperature",
+               "max": 1,
+               "min": 0,
+               "name": "cohere-temperature",
+               "step": 0.050000000000000003,
+               "type": "slider"
+            }
+         ],
          "category": [
             "llm"
          ],
@@ -452,7 +487,26 @@
    {
       "module": "components/ollama.jsonnet",
       "pattern": {
-         "args": [ ],
+         "args": [
+            {
+               "default": 4096,
+               "description": "Limit on number tokens to generate",
+               "label": "Maximum output tokens",
+               "name": "ollama-max-output-tokens",
+               "required": true,
+               "type": "integer"
+            },
+            {
+               "default": 0.5,
+               "description": "Controlling predictability / creativity balance",
+               "label": "Temperature",
+               "max": 1,
+               "min": 0,
+               "name": "ollama-temperature",
+               "step": 0.050000000000000003,
+               "type": "slider"
+            }
+         ],
          "category": [
             "llm"
          ],
@@ -472,7 +526,26 @@
    {
       "module": "components/openai.jsonnet",
       "pattern": {
-         "args": [ ],
+         "args": [
+            {
+               "default": 4096,
+               "description": "Limit on number tokens to generate",
+               "label": "Maximum output tokens",
+               "name": "openai-max-output-tokens",
+               "required": true,
+               "type": "integer"
+            },
+            {
+               "default": 0.5,
+               "description": "Controlling predictability / creativity balance",
+               "label": "Temperature",
+               "max": 1,
+               "min": 0,
+               "name": "openai-temperature",
+               "step": 0.050000000000000003,
+               "type": "slider"
+            }
+         ],
          "category": [
             "llm"
          ],
@@ -492,7 +565,26 @@
    {
       "module": "components/vertexai.jsonnet",
       "pattern": {
-         "args": [ ],
+         "args": [
+            {
+               "default": 4096,
+               "description": "Limit on number tokens to generate",
+               "label": "Maximum output tokens",
+               "name": "vertexai-max-output-tokens",
+               "required": true,
+               "type": "integer"
+            },
+            {
+               "default": 0.5,
+               "description": "Controlling predictability / creativity balance",
+               "label": "Temperature",
+               "max": 1,
+               "min": 0,
+               "name": "vertexai-temperature",
+               "step": 0.050000000000000003,
+               "type": "slider"
+            }
+         ],
          "category": [
             "llm"
          ],

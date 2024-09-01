@@ -145,9 +145,7 @@ const Arg : React.FC<ArgProps> =
             <FormControl fullWidth>
               <InputLabel>{field.label}</InputLabel>
               <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={20}
+                value={value}
                 label="{field.label}"
                 onChange={e => {
                     if (!e.target.value) return;
@@ -155,11 +153,16 @@ const Arg : React.FC<ArgProps> =
                         e.target.value
                     );
                 }}
-
               >
-                <MenuItem value={10}>Ten</MenuItem>
-                <MenuItem value={20}>Twenty</MenuItem>
-                <MenuItem value={30}>Thirty</MenuItem>
+                {
+                    field.options.map(opt =>
+                        (
+                            <MenuItem key={opt.id} value={opt.id}>
+                                {opt.description}
+                            </MenuItem>
+                        )
+                    )
+                }
               </Select>
               <FormHelperText>{field.description}</FormHelperText>
             </FormControl>

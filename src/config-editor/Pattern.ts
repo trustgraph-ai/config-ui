@@ -8,6 +8,7 @@ export interface ParameterDefinition {
     type : string;
     size? : number;
     rows? : number;
+    options? : { id : string, description : string }[];
 };
 
 export interface PatternMetadata {
