@@ -40,7 +40,6 @@ const CatalogSection : React.FC<CatalogSectionProps> =
                             if (id != "unavailable")
                                 return (
                                     <AvailablePattern
-                                        sx={{ p: "14rem" }}
                                         key={pat.pattern.name}
                                         pattern={pat}
                                         add={add}/>
@@ -48,7 +47,6 @@ const CatalogSection : React.FC<CatalogSectionProps> =
                             else
                                 return (
                                     <UnavailablePattern
-                                        sx={{ m: "1rem" }}
                                         key={pat.pattern.name}
                                         pattern={pat}/>
                                 );
