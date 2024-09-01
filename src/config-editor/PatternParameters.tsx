@@ -1,12 +1,12 @@
 
 import React from 'react';
 
-import Args from './Args';
+import Parameters from './Parameters';
 import {
     Pattern, ParameterSet, ParameterDefinition, ParameterValue
 } from './Pattern';
 
-interface ItemParametersProps {
+interface PatternParametersProps {
     selection : Pattern;
     parameters : ParameterSet;
     setParameter : (
@@ -15,7 +15,7 @@ interface ItemParametersProps {
     ) => void;
 };
 
-const ItemParameters : React.FC<ItemParametersProps> = 
+const PatternParameters : React.FC<PatternParametersProps> = 
     ({ selection, parameters, setParameter }) =>
 {
 
@@ -23,7 +23,7 @@ const ItemParameters : React.FC<ItemParametersProps> =
         <>
             <h2>{selection.pattern.title}</h2>
             <p>{selection.pattern.description}</p>
-            <Args
+            <Parameters
                 pattern={selection}
                 parameters={parameters}
                 setParameter={setParameter}
@@ -34,5 +34,5 @@ const ItemParameters : React.FC<ItemParametersProps> =
 
 }
 
-export default ItemParameters;
+export default PatternParameters;
 

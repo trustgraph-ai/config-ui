@@ -5,7 +5,7 @@ import Button from '@mui/material/Button';
 import { ContentPaste } from '@mui/icons-material';
 import TextField from '@mui/material/TextField';
 
-import ItemParameters from './ItemParameters';
+import PatternParameters from './PatternParameters';
 import {
     Pattern, ParameterSet, ParameterDefinition, ParameterValue
 } from './Pattern';
@@ -69,7 +69,7 @@ const Details : React.FC<DetailsProps> =
 
         <div className="card item-editor">
 
-        <ItemParameters
+        <PatternParameters
             selection={selection}
             parameters={parameters}
             setParameter={setParameter}

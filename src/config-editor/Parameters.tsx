@@ -4,12 +4,12 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 
-import Arg from './Arg';
+import Parameter from './Parameter';
 import {
     Pattern, ParameterSet, ParameterDefinition, ParameterValue
 } from './Pattern';
 
-interface ArgsProps {
+interface ParametersProps {
     pattern : Pattern;
     parameters : ParameterSet;
     setParameter : (
@@ -18,7 +18,7 @@ interface ArgsProps {
     ) => void;
 };
 
-const Args : React.FC<ArgsProps> =
+const Parameters : React.FC<ParametersProps> =
     ({ pattern, parameters, setParameter }) => 
 {
 
@@ -40,7 +40,7 @@ const Args : React.FC<ArgsProps> =
 
                     return (
                         <Box key={field.name}>
-                            <Arg
+                            <Parameter
                                 field={field}
                                 value={value}
                                 setParameter={set}
@@ -57,5 +57,5 @@ const Args : React.FC<ArgsProps> =
 
 }
 
-export default Args;
+export default Parameters;
 
