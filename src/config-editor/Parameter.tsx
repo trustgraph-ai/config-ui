@@ -106,7 +106,6 @@ const Parameter : React.FC<ParameterProps> =
     }
 
     if (field.type == "slider") {
-        console.log(value);
         return (
             <>
                 <Stack alignItems="left">
