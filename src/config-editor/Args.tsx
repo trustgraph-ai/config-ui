@@ -2,9 +2,7 @@
 import React from 'react';
 
 import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
 
-import { changeParam } from './change-param';
 import Arg from './Arg';
 import {
     Pattern, ParameterSet, ParameterDefinition, ParameterValue
@@ -28,7 +26,8 @@ const Args : React.FC<ArgsProps> =
     return pattern.pattern.args.map(
         (field) => {
 
-            const value = params.get(field.name);
+            let value = params.get(field.name);
+            if (!value) value = "";
 
             const set = (value : ParameterValue) => {
                 setParameter(pattern, field, value);

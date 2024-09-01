@@ -5,12 +5,11 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 
 import {
-    Pattern, ParameterSet, ParameterDefinition, ParameterValue
+    ParameterDefinition, ParameterValue
 } from './Pattern';
-import { changeParam } from './change-param';
 
 interface ArgProps {
-    field : Arg,
+    field : ParameterDefinition,
     value : ParameterValue,
     setParameter : (
         value : ParameterValue
@@ -26,9 +25,12 @@ const Arg : React.FC<ArgProps> =
             {field.description}
             <TextField
                 defaultValue={value}
-                onChange={e => setParameter(
-                    e.target.value
-                )}
+                onChange={e => {
+                    if (!e.target.value) return;
+                    setParameter(
+                        e.target.value
+                    );
+                }}
             />
         </Box>
     );

@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import './ConfigEditor.scss';
 import Plan from './Plan';
 import Catalog from './Catalog';
-import { Pattern, Arg, ParameterSet, PatternParameters } from './Pattern';
+import { Pattern, ParameterSet, PatternParameters, ParameterValue, ParameterDefinition } from './Pattern';
 import { generateDeployment } from './deployment';
 import { changeParam } from './change-param';
 import patternsUntyped from './patterns.json';
@@ -130,7 +130,7 @@ console.log(">", pattern.pattern.name, field.name, value);
             let pparams : PatternParameters = new Map();
 
             pattern.pattern.args.map(
-                (field : Arg) => {
+                (field : ParameterDefinition) => {
                     if (field.default)
                         pparams.set(field.name, field.default);
                     else
