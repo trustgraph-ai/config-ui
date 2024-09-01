@@ -1,11 +1,18 @@
 
-export interface Arg {
+export interface ParameterDefinition {
     default : string | number;
     description : string;
     name : string;
-    required? : Boolean;
+    label : string;
+    required : Boolean;
     type : string;
+    size? : number;
     width? : number;
+    rows? : number;
+    min? : number;
+    max? : number;
+    step? : number;
+    options? : { id : string, description : string }[];
 };
 
 export interface PatternMetadata {
@@ -18,7 +25,7 @@ export interface PatternMetadata {
     features : string[];
     requires : string[];
 
-    args : Arg[];
+    args : ParameterDefinition[];
 
 };
 

@@ -1,29 +1,58 @@
 
 import React from 'react';
 
-import { Pattern, ParameterSet } from './Pattern';
-import { changeParam } from './change-param';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+
+import Arg from './Arg';
+import {
+    Pattern, ParameterSet, ParameterDefinition, ParameterValue
+} from './Pattern';
 
 interface ArgsProps {
-    selection : Pattern;
+    pattern : Pattern;
     parameters : ParameterSet;
-    setParameters : (value : ParameterSet) => void;
+    setParameter : (
+        pattern : Pattern, field : ParameterDefinition,
+        value : ParameterValue
+    ) => void;
 };
 
 const Args : React.FC<ArgsProps> =
-    ({ selection, parameters, setParameters }) => 
+    ({ pattern, parameters, setParameter }) => 
 {
 
-    return selection.pattern.args.map(
-        (field) => 
-            <div key={selection.pattern.name + "//" + field.name}>
-                <div>
-                    <textarea
-                        defaultValue={parameters.get(selection.pattern.name)!.get(field.name)}
-                        onChange={e => changeParam(selection.pattern.name, field.name, e.target.value, parameters, setParameters)}
-                    />
-                </div>
-            </div>
+    const params = parameters.get(pattern.pattern.name)!;
+
+    return (
+        <Stack spacing={3}>
+
+        {
+            pattern.pattern.args.map(
+                (field) => {
+
+                    let value = params.get(field.name);
+                    if (value == null || value == undefined) value = "";
+
+                    const set = (value : ParameterValue) => {
+                        setParameter(pattern, field, value);
+                    }
+
+                    return (
+                        <Box key={field.name}>
+                            <Arg
+                                field={field}
+                                value={value}
+                                setParameter={set}
+                                />
+                        </Box>
+                    );
+                }
+           )
+       }
+
+       </Stack>
+
     );
 
 }

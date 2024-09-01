@@ -1,5 +1,7 @@
 
-import { Pattern, ParameterSet } from './Pattern';
+import {
+    Pattern, ParameterSet, ParameterDefinition, ParameterValue
+} from './Pattern';
 import PlanItems from './PlanItems';
 import Parameters from './Parameters';
 
@@ -12,12 +14,15 @@ interface PlanProps {
     deploy : (kind : string) => void;
     deployment : string | null;
     parameters : ParameterSet;
-    setParameters : (value : ParameterSet) => void;
+    setParameter : (
+        pattern : Pattern, field : ParameterDefinition,
+        value : ParameterValue
+    ) => void;
 }
 
 const Plan : React.FC<PlanProps> =
     ({ configuration, remove, selection, select, patterns, deploy,
-       deployment, parameters, setParameters }) => 
+       deployment, parameters, setParameter }) => 
 {
 
     return (
@@ -36,7 +41,7 @@ const Plan : React.FC<PlanProps> =
                 selection={selection}
                 deployment={deployment}
                 parameters={parameters}
-                setParameters={setParameters}
+                setParameter={setParameter}
             />
 
         </div>
