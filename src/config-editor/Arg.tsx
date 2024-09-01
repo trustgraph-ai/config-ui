@@ -118,15 +118,15 @@ const Arg : React.FC<ArgProps> =
                     sx={{ width: "80%", ml: 0, mr: 0 }}
                     label={field.label}
                     type="number"
-                    value={value}
+                    value={Number(value)}
                     min={field.min}
                     max={field.max}
                     valueLabelDisplay="auto"
                     step={field.step}
                     onChange={e => {
-                        if (e.target.value == null) return;
+                        if (!e.target) return;
                         setParameter(
-                            e.target.value
+                            (e.target as HTMLInputElement).value
                         );
                     }}
                 />
@@ -141,6 +141,9 @@ const Arg : React.FC<ArgProps> =
     }
 
     if (field.type == "select") {
+        if (!field.options)
+            throw Error(`Field ${field.name} used without options`);
+
         return ( 
             <FormControl fullWidth>
               <InputLabel>{field.label}</InputLabel>

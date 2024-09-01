@@ -7,7 +7,11 @@ export interface ParameterDefinition {
     required : Boolean;
     type : string;
     size? : number;
+    width? : number;
     rows? : number;
+    min? : number;
+    max? : number;
+    step? : number;
     options? : { id : string, description : string }[];
 };
 
