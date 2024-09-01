@@ -3,6 +3,7 @@ import React from 'react';
 
 import Button from '@mui/material/Button';
 import { ContentPaste } from '@mui/icons-material';
+import TextField from '@mui/material/TextField';
 
 import ItemParameters from './ItemParameters';
 import {
@@ -33,7 +34,27 @@ const Parameters : React.FC<ParametersProps> =
         return (
             <div className="card deployment-config">
                 <h2>Deployment configuration</h2>
-                <textarea value={deployment} readOnly={true}/>
+
+                <TextField
+                    sx={{
+                        width: "100%",
+                    }}
+                    value={deployment}
+                    size="medium"
+                    slotProps={{
+                        input: {
+                            readOnly: true,
+                            sx: {
+                                fontSize: "medium",
+                                fontWeight: 500,
+                                fontFamily: "monospace",
+                            },
+                        },
+                    }}
+                    multiline
+                    maxRows={20}
+                />
+
                 <Button onClick={copyToClipboard} variant="outlined"
                     startIcon={<ContentPaste/>}
                 >
