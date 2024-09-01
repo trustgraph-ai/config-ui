@@ -1,5 +1,5 @@
 
-export interface Arg {
+export interface ParameterDefinition {
     default : string | number;
     description : string;
     name : string;
@@ -18,7 +18,7 @@ export interface PatternMetadata {
     features : string[];
     requires : string[];
 
-    args : Arg[];
+    args : ParameterDefinition[];
 
 };
 

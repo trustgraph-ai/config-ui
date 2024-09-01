@@ -9,6 +9,7 @@ import Plan from './Plan';
 import Catalog from './Catalog';
 import { Pattern, Arg, ParameterSet, PatternParameters } from './Pattern';
 import { generateDeployment } from './deployment';
+import { changeParam } from './change-param';
 import patternsUntyped from './patterns.json';
 
 const patterns = (patternsUntyped as Pattern[]);
@@ -68,6 +69,19 @@ function ConfigEditor() {
     function select(pattern : Pattern) {
         setSelection(pattern);
         setDeployment(null);
+    }
+
+    function setParameter(
+        pattern : Pattern,
+        field : ParameterDefinition,
+        value : ParameterValue) {
+
+console.log(">", pattern.pattern.name, field.name, value);
+        changeParam(
+            pattern.pattern.name, field.name, value,
+            parameters, setParameters
+        );
+
     }
 
     function deploy(kind : string) {
@@ -166,7 +180,7 @@ function ConfigEditor() {
                     deploy={deploy}
                     deployment={deployment}
                     parameters={parameters}
-                    setParameters={setParameters}
+                    setParameter={setParameter}
                 />
 
                 <Catalog

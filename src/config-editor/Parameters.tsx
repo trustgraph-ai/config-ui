@@ -5,17 +5,22 @@ import Button from '@mui/material/Button';
 import { ContentPaste } from '@mui/icons-material';
 
 import ItemParameters from './ItemParameters';
-import { Pattern, ParameterSet } from './Pattern';
+import {
+    Pattern, ParameterSet, ParameterDefinition, ParameterValue
+} from './Pattern';
 
 interface ParametersProps {
     selection : Pattern | null;
     deployment : string | null;
     parameters : ParameterSet;
-    setParameters : (value : ParameterSet) => void;
+    setParameter : (
+        pattern : Pattern, field : ParameterDefinition,
+        value : ParameterValue
+    ) => void;
 };
 
 const Parameters : React.FC<ParametersProps> =
-    ({ selection, deployment, parameters, setParameters }) =>
+    ({ selection, deployment, parameters, setParameter }) =>
 {    
 
     const copyToClipboard = () => {
@@ -46,7 +51,7 @@ const Parameters : React.FC<ParametersProps> =
         <ItemParameters
             selection={selection}
             parameters={parameters}
-            setParameters={setParameters}
+            setParameter={setParameter}
         />
 
         </div>
