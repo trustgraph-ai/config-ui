@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
 import Button from '@mui/material/Button';
@@ -10,9 +10,6 @@ import Catalog from './Catalog';
 import { Pattern, ParameterSet, PatternParameters, ParameterValue, ParameterDefinition } from './Pattern';
 import { generateDeployment } from './deployment';
 import { changeParam } from './change-param';
-import patternsUntyped from './patterns.json';
-
-const patterns = (patternsUntyped as Pattern[]);
 
 // Workaround to make isSubsetOf work
 declare global {
@@ -47,6 +44,7 @@ function ConfigEditor() {
     const [deployment, setDeployment] = useState<string | null>(null);
     const [parameters, setParameters] = useState<ParameterSet>(new Map());
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [patterns, setPatterns] = useState<Pattern[]>([]);
 
     const patternMap : Map<string, Pattern> = new Map(
 	patterns.map(obj => [obj.pattern.name, obj])
@@ -163,6 +161,23 @@ function ConfigEditor() {
         setDeployment(null);
 
     }
+
+    useEffect(() => {
+        fetch(
+            "/api/patterns", {
+                method: "GET",
+                headers: {
+                }
+            }
+        ).then(
+            p => p.json()
+        ).then(
+            p => {
+                setPatterns(p as Pattern[]);
+            }
+        );
+            
+    }, []);
 
     return (
         <>

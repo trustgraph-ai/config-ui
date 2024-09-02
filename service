@@ -49,12 +49,14 @@ class Generator:
                 return str(path), f.read()
 
 class Api:
-    def __init__(self, config=None):
+    def __init__(self, patterns="", config=None):
 
         if config:
             self.config = config
         else:
             self.config = {}
+
+        self.patterns = patterns
 
         self.port = int(self.config.get("port", "8081"))
         self.app = web.Application(middlewares=[])
@@ -74,6 +76,11 @@ class Api:
                 )
 
         print(request.path)
+
+        if request.path == "/api/patterns":
+            return web.Response(
+                text=self.patterns, content_type="application/json"
+            )
 
         if request.path.endswith(".css"):
             with open("dist" + request.path, "r") as f:
@@ -121,7 +128,13 @@ class Api:
 
         web.run_app(self.app, port=self.port)
 
-a = Api()
+print("Create all-patterns from templates...")
+with open("./templates/all-patterns.jsonnet", "r") as f:
+    cfg = f.read()
+gen = Generator("")
+patterns = gen.process(cfg)
+print("Done.")
 
+a = Api(patterns=json.dumps(patterns, indent=4))
 a.run()
 
