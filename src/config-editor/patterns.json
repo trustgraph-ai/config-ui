@@ -726,32 +726,7 @@
    {
       "module": "components/trustgraph.jsonnet",
       "pattern": {
-         "args": [
-            {
-               "default": 50,
-               "description": "Limit on entities to fetch from vector store",
-               "label": "GraphRAG entity query limit",
-               "name": "graph-rag-entity-limit",
-               "required": true,
-               "type": "integer"
-            },
-            {
-               "default": 30,
-               "description": "Limit on triples to fetch from triple store",
-               "label": "GraphRAG triple query limit",
-               "name": "graph-rag-triple-limit",
-               "required": true,
-               "type": "integer"
-            },
-            {
-               "default": 3000,
-               "description": "Limit on size of subgraph to present to text-completion model",
-               "label": "GraphRAG maximum subgraph size",
-               "name": "graph-rag-max-subgraph-size",
-               "required": true,
-               "type": "integer"
-            }
-         ],
+         "args": [ ],
          "category": [
             "foundation"
          ],
