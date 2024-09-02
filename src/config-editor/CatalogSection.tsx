@@ -16,14 +16,19 @@ interface CatalogSectionProps {
     name : string,
     patterns : Pattern[];
     add : (value : string) => void;
+    expanded : string | false;
+    handleChange : any;
 }
 
 const CatalogSection : React.FC<CatalogSectionProps> =
-    ({ id, name, patterns, add}) =>
+    ({ id, name, patterns, add, expanded, handleChange}) =>
 {
 
     return (
-        <Accordion key={id}>
+        <Accordion key={id}
+            expanded={expanded == id}
+            onChange={handleChange(id)}
+        >
             <AccordionSummary
                 expandIcon={<ExpandMoreIcon/>}
                 id={id}>

@@ -36,6 +36,14 @@ const Catalog : React.FC<CatalogProps> =
         patterns: unavailable
     });
 
+    const [expanded, setExpanded] = React.useState<string | false>(false);
+
+    const handleChange =
+        (panel: string) =>
+            (_event: React.SyntheticEvent, isExpanded: boolean) => {
+                setExpanded(isExpanded ? panel : false);
+            };
+
     return (
         <div className="card">
 
@@ -53,6 +61,8 @@ const Catalog : React.FC<CatalogProps> =
                                     name={cat.name}
                                     patterns={cat.patterns}
                                     add={add}
+                                    expanded={expanded}
+                                    handleChange={handleChange}
                                     />
                             )
                        }
