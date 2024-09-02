@@ -1,11 +1,11 @@
 {
     pattern: {
-	name: "trustgraph-base",
+	name: "graph-rag",
         icon: "🤝😂",
-        title: "Add Trustgraph base processing flows",
-	description: "This pattern adds a core set of Trustgraph flows, including PDF ingest, chunking, embeddings, and knowledge graph extraction.  You should also consider adding an LLM and at least one RAG processing flow.",
-        requires: ["pulsar"],
-        features: ["trustgraph"],
+        title: "Add GraphRAG processing flow",
+	description: "This pattern adds GraphRAG components for extracting and querying graph edges.  You should make sure a triple store and vector store are included in your plan.",
+        requires: ["pulsar", "trustgraph", "llm"],
+        features: ["graph-rag"],
 	args: [
 	    {
 		name: "graph-rag-entity-limit",
@@ -32,7 +32,7 @@
 		required: true,
             },
 	],
-        category: [ "foundation" ],
+        category: [ "processing" ],
     },
     module: "components/trustgraph.jsonnet",
 }
