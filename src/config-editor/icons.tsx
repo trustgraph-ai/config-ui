@@ -1,6 +1,8 @@
 
 import {
     Psychology,
+    Spoke,
+    Plumbing,
     Engineering,
     Hub,
     ChatBubble,
@@ -13,6 +15,8 @@ const fontSize = "large";
 
 export const icons : { [key : string] : JSX.Element } = {
     "llm": <Psychology color="primary" fontSize={fontSize}/>,
+    "processing": <Plumbing color="primary" fontSize={fontSize}/>,
+    "embeddings": <Spoke color="primary" fontSize={fontSize}/>,
     "foundation": <Engineering color="primary"  fontSize={fontSize}/>,
     "knowledge-graph": <Hub color="primary"  fontSize={fontSize}/>,
     "prompting": <ChatBubble color="primary"  fontSize={fontSize}/>,

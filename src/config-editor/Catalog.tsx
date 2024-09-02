@@ -2,16 +2,7 @@ import React from 'react';
 
 import { Pattern } from './Pattern';
 import CatalogSection from './CatalogSection';
-
-const categories : { id : string; name : string }[] = [
-    { id: "foundation", name: "Foundation" },
-    { id: "llm", name: "LLM" },
-    { id: "knowledge-graph", name: "Knowledge graph" },
-    { id: "prompting", name: "Prompting" },
-    { id: "chunking", name: "Chunking" },
-    { id: "monitoring", name: "Monitoring" },
-    { id: "vector-store", name: "Vector store" },
-];
+import { categories } from './categories';
 
 interface CatalogProps {
     available : Pattern[],
